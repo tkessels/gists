@@ -1,0 +1,7 @@
+#!/bin/bash
+touchpad_id=$(xinput list | grep -i touch | grep -Po '(?<=id=)\d+')
+if (xinput list-props 14 | grep "Device Enabled" | grep -Po '\d$' | grep -q "1"); then
+  xinput disable "${touchpad_id}"
+else
+  xinput enable "${touchpad_id}"
+fi
