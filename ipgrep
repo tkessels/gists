@@ -1,0 +1,147 @@
+#!/bin/bash
+# Greps IPs and MACs
+# author : Tobias Kessels
+# date 	 : 26.01.2015
+
+#grep Perl Regexpattern for MAC and IP
+IP_PATTERN="(((25[0-5])|(2[0-4][0-9])|(1?\d?\d))\.){3}((25[0-5])|(2[0-4][0-9])|(1?\d?\d))"
+MACID_PATTERN="(([a-fA-F0-9]{2}[:-]){5}[a-fA-F0-9]{2})|([a-f0-9]{4}\.[a-f0-9]{4}\.[a-f0-9]{4})"
+
+#sort parameters to sort IPs correctly
+IP_SORT=" -t. -k1,1n -k2,2n -k3,3n -k4,4n"
+
+#SWITCHES & DEFAULTS
+SORT=0
+UNIQ=0
+MAC=0
+PINGABLE=0
+RESOLVE=0
+FILE=""
+PATTERN=${IP_PATTERN}
+SORT_PATTERN=${IP_SORT}
+
+#prints usage help and exits
+usage () {
+echo "ipgrep [-u] [-s] [-m]"
+echo ""
+echo " ipgrep greps IPs or MACs from any output or file "
+echo "	-s	sort Output"
+echo "  -u	only show uniq IPs/MACs (implies -s)"
+echo "  -p	only show 'pingable' entries (MACs still beta)"
+echo "  -r  show additional information"
+echo "  -m      grep MAC-IDs instead of IPs"
+exit 1;
+}
+
+#process commandline switches
+while getopts :husmrpf: FLAG; do
+	case $FLAG in
+	u)	UNIQ=1	;;
+	s)	SORT=1	;;
+	m)	MAC=1	;;
+	p)	PINGABLE=1 ;;
+	r)  RESOLVE=1 ;;
+	f)	FILE=$OPTARG ;;
+	h)	usage	;;
+	\?)	echo "whats that: $OPTARG"
+		usage	;;
+	esac
+done
+
+#clear all Arguments so that 'cat $@' wont get any switches
+shift $#
+
+
+if [[ MAC -eq 1 ]]; then
+PATTERN=${MACID_PATTERN}
+SORT_PATTERN=""
+fi
+
+if [[ PINGABLE -eq 1 ]]; then
+	SORT=1
+	UNIQ=1
+fi
+
+filtery() {
+	if [[ $MAC -eq 1 ]]; then
+		cat "$@" | grep -Po "${MACID_PATTERN}"
+	else
+		cat "$@" | grep -Po "${IP_PATTERN}"
+	fi
+}
+
+sorty() {
+	if [[ $SORT -eq 1 ]] || [[ $UNIQ -eq 1 ]]
+	then
+		if [[ MAC -eq 1 ]]; then
+			SORT_PATTERN=""
+		else
+			SORT_PATTERN="${IP_SORT}"
+		fi
+
+		if [[ UNIQ -eq 1 ]]; then
+			cat "$@" | sort $SORT_PATTERN -u
+		else
+			cat "$@" | sort $SORT_PATTERN
+		fi
+	else
+		cat "$@"
+	fi
+}
+
+pingy() {
+	if [[ PINGABLE -eq 1 ]]; then
+		if [[ MAC -eq 1 ]]; then
+			(for i in $(cat "$@")
+			do
+				(if (arping -c 1 -w 5000000 $i 2>/dev/null 1>/dev/null)
+				then 
+					echo $i
+				fi)&
+			done) | sorty
+
+		else
+			(for i in $(cat "$@")
+			do
+				(if (ping -c1 -w1 $i >/dev/null)
+				then 
+					echo $i
+				fi)&
+			done) | sorty
+		fi
+	else
+		cat "$@"
+	fi
+}
+
+resolve(){
+if [[ RESOLVE -eq 1 ]]; then
+		if [[ MAC -eq 1 ]]; then
+			(for i in $(cat "$@")
+			do
+				(if (arping -q -c 1 -w 5000000 $i 2>/dev/null 1>/dev/null)
+				then 
+					arping -c1 $i
+				fi)&
+			done) | sorty
+
+		else
+			(for i in $(cat "$@")
+			do
+				(
+					name=$(host $i |  grep -Po "(?<=pointer ).*")
+					echo "$i  $name"
+				)&
+			done) | cat
+		fi
+	else
+		cat "$@"
+	fi
+}
+set -e
+#execute command
+if [ "$FILE" == "" ]; then
+cat "$@" | filtery | sorty | pingy | resolve
+else
+cat $FILE | filtery | sorty | pingy | resolve
+fi 
