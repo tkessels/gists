@@ -1,0 +1,19 @@
+#!/bin/bash
+#check if comma or semicolon
+if [[ $( grep -c ',' $1 ) -gt $( grep -c ';' $1 ) ]]
+then
+    delim=','
+else
+    delim=';'
+fi
+
+file=$1
+shift
+#build cut
+cut_cmd="cut -d${delim} -f"
+#for option in $* ; do
+#head -n1 $file | cut -d${delim} -f${option}
+#done
+cut_cmd="${cut_cmd}$(echo ${*} | tr ' ' ',') ${file}"
+#echo ${cut_cmd%,}
+$(echo $cut_cmd)

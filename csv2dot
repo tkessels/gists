@@ -1,0 +1,17 @@
+#!/bin/bash
+
+header=1
+file=test.csv
+output="${file}.dot"
+delim=,
+s_id=6
+d_id=8
+e_label=11
+cat > "${output}" <<EOF
+graph a{
+node [shape=record]
+EOF
+
+#awk -F"${delim}" '{print "\""$6 "\" -> \"" $8 "\"[label=\"" $11"\"]"}' "${file}" >> "${output}" 
+awk -F"${delim}" '{print "\""$6 "\" -- \"" $8 "\""}' "${file}" >> "${output}" 
+echo "}" >> "${output}"

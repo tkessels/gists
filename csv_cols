@@ -1,0 +1,12 @@
+#!/bin/bash
+#check if comma or semicolon
+if [[ $( grep -c ',' $1 ) -gt $( grep -c ';' $1 ) ]]
+then
+    delim=','
+else
+    delim=';'
+fi
+
+#get headings and display them
+head -n1 $1 | tr "$delim" "\n" | nl
+

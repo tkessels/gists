@@ -1,0 +1,81 @@
+#!/bin/bash
+###################Wipe (optional)
+DEVICE=${1}
+wipedelay=20
+
+
+#Test for missing packages
+if !( dpkg -s hdparm && dpkg -s dialog && dpkg -s dc3dd && dpkg -s util-linux ); then
+	echo "Wipe-Skript benötigt die folgenden Pakete:"
+	echo "  hdparm" 		#secure erase
+	echo "  dialog" 		#abfrage/menu
+	echo "  dc3dd"  		#klassisches wipen
+	echo "  util-linux" 		# > rtcwake für  den kurzschlaf um die platte 'aufzutauen'
+	exit 1
+fi
+
+#Wenn kein  gültiger Datenträger definiert wurde frage nach
+if ( [ -z "$DEVICE" ] || [ ! -b "$DEVICE" ] ) ; then
+	# Liste verfügbarer Geräte erstellen
+	W=()            		# Leere Liste
+	while read -r line; do 	# mit Einträgen befüllen
+		dev=$(echo $line | cut -f1 -d" ")
+		rest=$(echo $line | cut -f2- -d" " | tr -s " ")
+    	W+=("/dev/${dev}" "${rest}")
+	done < <( lsblk -l -oname,size,model,type | grep -e disk )
+	#Datenträger Auswahl anzeigen
+	DEVICE=$(dialog --backtitle "CERTBw - SecureErase" --title "Verfügbare Datenträger" --menu "Welche Platte soll gewipet werden?" 24 80 17 "${W[@]}" 3>&2 2>&1 1>&3)
+fi
+
+#Bei Cancel Abbrechen
+if [ ! -b "${DEVICE}" ] ; then
+	echo "==WIPE : Kein gültiges BLOCK-Device ausgewählt."
+	sleep 1
+	read -p "Press [ENTER] key for Shell..."
+	exit 1
+fi
+
+#Warnung anzeigen
+#Countdown anzeigen
+dialog --backtitle "CERTBw - SecureErase"  --defaultno --cancel-label "Abbruch" --colors --title "\Z1!WARNUNG!\Zn" --pause "\n\Z1Der Datenträger ${DEVICE} wird vollständig gelöscht!\Zn\n\nDer SecureErase Prozess darf nicht unterbrochen werden da dieser den den Datenträger \Zblocked\ZB und dieser anschließend manuel entriegelt werden müsste.\n\n\nDer Vorgang wird nach ablauf des Countdowns automatisch fortgesetzt.\n\nUm den DiskWipe \Z4abzubrechen\Zn können Sie:\n        \Z4\"Abbruch\" auswählen\n        \"ESC\" Drücken\n        \"STRG + C\" Drücken\n        Den Computer ausschalten\Zn" 24 80 ${wipedelay}
+if [ "$?" -gt 0 ] ; then
+	echo "==WIPE : Wipe wurde vom Nutzer abgebrochen."
+	sleep 1
+	read -p "Press [ENTER] key for Shell..."
+	exit 1
+fi
+
+#Prüfen ob SecureErase möglich ist
+if (hdparm -I ${DEVICE} | grep supported | grep -q erase); then
+echo "==WIPE : Secure Erase wird von ${DEVICE} unterstützt"
+	#Das Gerät bei bedarf unfreezen durch standby
+	if ( ! (hdparm -I ${DEVICE} | grep not | grep -q frozen)); then
+		echo "==WIPE : Das Gerät ${DEVICE} ist frozen"
+		echo "==WIPE : Das Notebook wird nun für 10 Sekunden in den Standby versetzt."
+		echo "==WIPE : Das Notebook darf nicht ausgeschaltet werden."
+		sleep 5
+		rtcwake -s 10 -m mem
+		echo "==WIPE : Das Notebook ist wieder aufgewacht. Der Status von ${DEVICE} wird überprüft."
+	fi
+		if (hdparm -I ${DEVICE} | grep not | grep -q frozen); then
+		echo "==WIPE : Das Gerät ${DEVICE} ist 'not frozen'"
+		echo ; echo
+		echo "==WIPE : Für SecureErase muss vorübergehend ein ATA-Password (certbw) gesetzt werden."
+		echo "==WIPE : Wenn der SecureErase - Prozess unterbrochen wird ist die Festplatte unbrauchbar bis sie händisch entriegelt wurde."
+		echo "==WIPE : Das Notebook darf nicht ausgeschaltet werden."
+		sleep 5
+		#set ata password
+		hdparm --user-master u --security-set-pass certbw ${DEVICE}
+		#issue secure erase command
+		hdparm --user-master u --security-erase certbw ${DEVICE}
+
+	else #Normal löschen weil unfrezze nicht funktioniert hat
+		echo "==WIPE : Das Gerät konnte nicht aus dem Status 'frozen' geholt werden."
+		echo "==WIPE : Das Geräte ${DEVICE} wird überschrieben"
+   		/usr/bin/dc3dd wipe=${DEVICE}
+	fi
+	else #Normal löschen
+	echo "==WIPE : Secure Erase wird NICHT unterstützt"
+	echo "==WIPE : Das Geräte ${DEVICE} wird überschrieben"
+ 	/usr/bin/dc3dd wipe=${DEVICE}
+fi

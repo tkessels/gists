@@ -1,0 +1,16 @@
+#!/bin/bash
+max=0
+open=0
+grep -Po "</?div" OFFIZIELLE\ GEWINN...htigung\ und\ letzter\).eml | while read tag; do
+  if [[ "$tag" == "<div" ]] ; then
+    (( open++ ))
+  else
+    (( open--))
+  fi
+
+  echo "$open - $max"
+
+  if [[ $open -gt $max ]] ; then
+    max=$open
+  fi
+done
