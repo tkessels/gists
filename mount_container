@@ -1,0 +1,143 @@
+#!/bin/bash
+## Functions
+#find containers
+containers=""
+commands=""
+
+function read_containers(){
+  containers=$(
+  [ -e ~/.containers ] && cat ~/.containers 2>/dev/null
+  find /media/${USER} -maxdepth 2 -iname ".containers" | while read line ; do
+    cat $line | awk -F';' -v path="$(dirname $line)" '{OFS=";" ; print $1,path"/"$2}'
+  done)
+}
+
+function mount_container(){
+  container_line=$*
+  name=$(echo $container_line | cut -f1 -d';')
+  path=$(echo $container_line | cut -f2 -d';')
+  mount_point="/mnt/${name}"
+
+  #mount only if containerfile is valid
+  if [ -e ${path} ] && cryptsetup isLuks "${path}" ; then
+    #if mountpoint is not there create it
+    [ ! -e ${mount_point} ] && sudo mkdir -p "${mount_point}" && sudo chmod 777 "${mount_point}"
+    #open luks Container
+    sudo cryptsetup luksOpen "${path}" "${name}"
+    #mount Container
+    sudo mount "/dev/mapper/${name}" "${mount_point}"
+  else
+    echo "Container ${path} not found" && continue
+  fi
+}
+
+function unmount_container(){
+  container_line=$*
+  name=$(echo $container_line | cut -f1 -d';')
+  path=$(echo $container_line | cut -f2 -d';')
+  mount_point="/mnt/${name}"
+
+  #unmount only if mounted
+  if ( mount | grep -q "${mount_point}" ) ; then
+    #if still in use
+    if [[ $( lsof "${mount_point}" | wc -l ) -gt 0 ]] ; then
+      echo "Mountpoint ${mount_point} is still in use:"
+      lsof "${mount_point}"
+      continue
+    else
+      sudo umount -l "${mount_point}"
+      sudo rmdir "${mount_point}"
+    fi
+
+    sudo cryptsetup luksClose "${name}"
+  fi
+}
+
+function is_open(){
+  container_path="${1}"
+  ls -b /dev/mapper/ | xargs -n1 sudo cryptsetup status | grep loop: | grep -q "${container_path}"
+  return $?
+}
+
+function is_mounted(){
+  mount_point="${1}"
+  mount | grep -q "${mount_point}"
+  return $?
+}
+
+function is_used(){
+  mount_point="${1}"
+  lsof ${mount_point} 2>/dev/null 1>&2
+  return $?
+}
+
+function is_mounted_container(){
+  container_line=$*
+  name=$(echo $container_line | cut -f1 -d';')
+  path=$(echo $container_line | cut -f2 -d';')
+  mount_point="/mnt/${name}"
+  result=0
+  mount | grep -q "${mount_point}" && (( result+=1 ))
+  sudo cryptsetup status ${name} | grep -q "${path}" && (( result+=2 ))
+  echo $result
+  return $result
+}
+
+#mount all containers
+function mount_all(){
+  read_containers
+  for line in $containers ; do
+    mount_container $line
+  done
+}
+
+#unmount all containers
+function unmount_all(){
+  read_containers
+  for line in $containers ; do
+    unmount_container $line
+  done
+}
+
+#print status
+function print_status(){
+  container_line=$*
+  name=$(echo $container_line | cut -f1 -d';')
+  path=$(echo $container_line | cut -f2 -d';')
+  mount_point="/mnt/${name}"
+  echo "Stats for $name : $path"
+  is_open ${path} && echo "IS OPENED"
+  is_mounted ${mount_point} && echo "IS MOUNTED"
+  is_used ${mount_point} && echo "IS IN USE"
+}
+
+#print status
+function print_status_all(){
+  read_containers
+  for line in $containers ; do
+    print_status $line
+  done
+
+}
+
+##main
+
+command="show"
+[[ $# -eq 1 ]] && command="${1}"
+echo "Command: ${command}"
+
+case $command in
+  mount)
+  mount_all
+  ;;
+  unmount)
+  unmount_all
+  ;;
+  list)
+  print_status_all
+  ;;
+  *)
+  read_containers
+  echo $containers
+  ;;
+esac
