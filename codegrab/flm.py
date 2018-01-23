@@ -2,7 +2,11 @@
 import sys
 import re
 
+ignore_case=True
+
 pattern=str(sys.argv[1])
+if ignore_case:
+    pattern=pattern.lower()
 filename=str(sys.argv[2])
 shortpattern=""
 print("Pattern is '%s'" % pattern)
@@ -13,7 +17,8 @@ for char in pattern:
         newchar={}
         newchar['char']=char
         newchar['count']=pattern.count(char)
-        newchar['idx']=[m.start() for m in re.finditer(char,pattern)]
+        newchar['idx']=[m.start() for m in re.finditer(re.escape(char),pattern)]
+        print(char)
         #print("Char '%s' occurs %d times in pattern %s" % (c,newchar['count'],newchar['idx']))
         chars[char]=newchar
         shortpattern=shortpattern + char
@@ -25,9 +30,12 @@ except:
 
 print(shortpattern)
 longest_match_yet=0
+def get_char():
+    return f.read(1).lower() if ignore_case else f.read(1)
 
 while longest_match_yet<len(pattern):
-    read_a_char=f.read(1)
+    # read_a_char=f.read(1)
+    read_a_char=get_char()
     if read_a_char in shortpattern and read_a_char in chars:
         #candidate
         for index in chars[read_a_char]['idx']:
@@ -41,7 +49,8 @@ while longest_match_yet<len(pattern):
                 # print("trying to find rest of pattern '%s'" % sub_pattern)
                 x=1
                 for char_to_compare in sub_pattern:
-                    next_char=f.read(1)
+                    # next_char=f.read(1)
+                    next_char=get_char()
                     if not read_a_char:
                         print("No more Chars to consume in File")
                         break
