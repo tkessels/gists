@@ -1,0 +1,19 @@
+#!/bin/bash
+command="${1}"
+case ${command} in
+on)
+echo "turning on"
+gsettings set org.gnome.desktop.media-handling automount true
+gsettings set org.gnome.desktop.media-handling automount-open true
+;;
+off)
+echo "turning off"
+gsettings set org.gnome.desktop.media-handling automount false
+gsettings set org.gnome.desktop.media-handling automount-open false
+;;
+*)
+echo "status"
+gsettings list-recursively  | grep automount
+gsettings get org.gnome.desktop.media-handling automount
+gsettings get org.gnome.desktop.media-handling automount-open
+esac
