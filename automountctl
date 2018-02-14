@@ -1,19 +1,67 @@
 #!/bin/bash
 command="${1}"
+
+if ! (which gsettings 1>/dev/null) ; then
+echo "need gsettings"
+exit 1
+fi
+
+if (gsettings get org.mate.media-handling automount 1>/dev/null) ; then
+mate=1
+fi
+
+if (gsettings get org.gnome.desktop.media-handling automount 1>/dev/null) ; then
+gnome=1
+fi
+
+if [ -z $mate ] && [ -z $gnome ] ; then
+echo "No supported Settings found"
+echo "mate :  org.mate.media-handling automount"
+echo "gnome:  org.gnome.desktop.media-handling automount"
+exit 1
+fi
+
 case ${command} in
 on)
 echo "turning on"
+if [ $mate -eq "1" ] ; then
+gsettings set org.mate.media-handling automount true
+gsettings set org.mate.media-handling automount-open true
+fi
+if [ $gnome -eq "1" ] ; then
 gsettings set org.gnome.desktop.media-handling automount true
 gsettings set org.gnome.desktop.media-handling automount-open true
+fi
 ;;
 off)
 echo "turning off"
+if [ $mate -eq "1" ] ; then
+gsettings set org.mate.media-handling automount false
+gsettings set org.mate.media-handling automount-open false
+fi
+if [ $gnome -eq "1" ] ; then
 gsettings set org.gnome.desktop.media-handling automount false
 gsettings set org.gnome.desktop.media-handling automount-open false
+fi
 ;;
 *)
 echo "status"
-gsettings list-recursively  | grep automount
+
+if [ $mate -eq "1" ] ; then
+echo "#  mate-settings found"
+echo "## org.mate.media-handling automount :"
+gsettings get org.mate.media-handling automount
+echo "## org.mate.media-handling automount-open :"
+gsettings get org.mate.media-handling automount-open
+fi
+
+if [ $gnome -eq "1" ] ; then
+echo "#  gnome-settings found"
+echo "## org.gnome.desktop.media-handling automount :"
 gsettings get org.gnome.desktop.media-handling automount
+echo "## org.gnome.desktop.media-handling automount-open :"
 gsettings get org.gnome.desktop.media-handling automount-open
+fi
+
+
 esac
