@@ -1,5 +1,6 @@
-ppxml=xmlstarlet format --indent-tab
-ppxml=xmllin --format -
+alias rot13='tr "abcdefghijklmnopqrstuvwxyz" "zyxwvutsrqponmlkjihgfedcba"'
+alias ppxml="xmlstarlet format --indent-tab"
+alias ppxml="xmllin --format -"
 PS1='\[\033[44;37m\]================================================================================\[\033[1;0m\]\r\n\t \w :\n\$ '
 alias '+'='pushd .'
 alias -- '-'='popd'
