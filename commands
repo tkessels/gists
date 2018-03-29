@@ -6,4 +6,5 @@ arecord -f cd -t raw | oggenc - -r | ssh <remote> mplayer -
 #and reverse
 ssh <user>@<remotehost> 'arecord -f cd -t raw | oggenc - -r' | mplayer -
 
-
+#Zahlen verteilung analysieren
+primes 1 100 |gnuplot -p -e 'plot "/dev/stdin"'
