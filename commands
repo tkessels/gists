@@ -5,6 +5,8 @@ awk '{a[$0]+=1; if (a[$0]<2)print}'
 arecord -f cd -t raw | oggenc - -r | ssh <remote> mplayer -
 #and reverse
 ssh <user>@<remotehost> 'arecord -f cd -t raw | oggenc - -r' | mplayer -
+#got to sleep for an hour then wake up
+sudo rtcwake -m mem -t +`date -u +%s -d +60minutes`
 
 #Zahlen verteilung analysieren
 primes 1 100 |gnuplot -p -e 'plot "/dev/stdin"'

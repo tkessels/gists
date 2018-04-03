@@ -8,6 +8,7 @@ alias mv="mv -vi"
 alias cp="cp -vi"
 alias nasmount="pushd . ; sudo mount ~/mnt/nas ; cd ~/mnt/nas"
 alias nasunmount="sudo umount ~/mnt/nas"
+alias docker_status="docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock moncho/dry"
 alias kali='docker run --rm -it --dns=192.168.130.1 -v ${workdir-`pwd`}:/root/workdir kali'
 alias remnux_viper='docker run --rm -it --dns=192.168.130.1 -v ${workdir-`pwd`}:/home/nonroot/workdir remnux/viper bash'
 alias remnux_pescanner='docker run --rm -it --dns=192.168.130.1 -v ${workdir-`pwd`}:/home/nonroot/workdir remnux/pescanner bash'
