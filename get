@@ -1,0 +1,21 @@
+#!/bin/bash
+start=${1}
+end=${1#*-}
+shift
+count=1
+if [[ -z "${end}" ]] ; then
+#	echo "no end specified"
+	if [[ $# -eq 1 ]] ; then
+		echo "setting count"
+		count=${1}
+	fi
+	end=$(( ${start} - 1 + ${count} ))
+#	echo "from ${start}"
+#	echo "end ${end}"
+else
+	start=${start%-*}
+#	echo "from ${start}"
+#	echo "end ${end}"
+fi
+
+cat $@ | head -n+${end} | tail -n+${start}
