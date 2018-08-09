@@ -5,11 +5,12 @@ USER root
 RUN apt-get update && apt-get install -y \
   git \
   python3-lxml \
-  python-libemu \
   libemu2 \
-  libemu-dev \
-  libboost-all-dev \
+  pkg-config \
+  autoconf \
+  python-pil \
   python-pip ; \
+  pip install pylibemu ; \
   rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -r nonroot && \
@@ -18,10 +19,11 @@ RUN groupadd -r nonroot && \
   chown -R nonroot:nonroot /home/nonroot
 
 RUN git clone https://github.com/jesparza/peepdf /opt/peepdf
+RUN git clone https://github.com/DidierStevens/DidierStevensSuite /opt/DidierStevensSuite
 
 USER root
 WORKDIR /home/nonroot/
-#RUN pip install -v pyv8
+
 RUN ln -s /opt/peepdf/peepdf.py /bin/peepdf.py
 RUN chmod +x /bin/peepdf.py
 
