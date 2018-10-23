@@ -1,13 +1,12 @@
-version: '2.2'
+version: '2'
 services:
     elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:6.3.2
         container_name: elasticsearch
         hostname: elasticsearch
-        restart: unless-stopped
         ports:
-        - "10.1.0.10:9200:9200"
-        - "10.1.0.10:9300:9300"
+        - "9200:9200"
+        - "9300:9300"
         volumes:
         - elastic-data:/usr/share/elasticsearch/data
         environment:
@@ -22,12 +21,10 @@ services:
         - elk
 
     kibana:
-        image:
-            kibana
+        image: docker.elastic.co/kibana/kibana:6.3.2
         hostname: kibana
-        restart: unless-stopped
         ports:
-        - "10.1.0.10:5601:5601"
+        - "5601:5601"
         networks:
         - elk
         depends_on:
