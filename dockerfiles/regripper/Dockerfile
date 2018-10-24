@@ -20,5 +20,6 @@ RUN chmod +x /usr/local/bin/rip
 RUN sed -i '64s|"plugins"|"/RegRipper2.8/plugins"|' /usr/local/bin/rip
 RUN sed -i "1i #!`which perl`" /usr/local/bin/rip
 RUN sed -i '2i use lib qw(/usr/local/lib/rip-lib/lib/perl5/);' /usr/local/bin/rip
+USER user
 WORKDIR /data
 ENTRYPOINT ["/bin/bash"]
