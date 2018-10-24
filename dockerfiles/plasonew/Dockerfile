@@ -6,8 +6,8 @@ RUN locale-gen "en_US.UTF-8"
 ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 
-RUN groupadd -g 999 user && \
-useradd -r -u 999 -g user user
+RUN groupadd -g 1001 user && \
+useradd -r -u 1001 -g user user
 
 RUN apt update && apt install -y software-properties-common
 RUN add-apt-repository -y ppa:gift/stable
