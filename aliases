@@ -23,4 +23,4 @@ alias remnux_cyberchef_start="sudo docker run --rm --name cyberchefy -d -p 8080:
 alias remnux_cyberchef_stop="sudo docker stop cyberchefy"
 alias remnux_jsdetox_start='sudo docker run --rm --name critsy -it --dns=192.168.130.1 -v ${workdir-`pwd`}:/home/nonroot/workdir -p 8443:8443 remnux/crits'
 alias remnux_jsdetox_stop="sudo docker stop critsy"
-
+alias drit='docker run -it --rm'
