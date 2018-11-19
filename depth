@@ -1,8 +1,10 @@
 #!/bin/bash
+file="${1}"
+stag="${2}"
 max=0
 open=0
-grep -Po "</?div" OFFIZIELLE\ GEWINN...htigung\ und\ letzter\).eml | while read tag; do
-  if [[ "$tag" == "<div" ]] ; then
+grep -Po "</?${stag}" "${file}" | while read tag; do
+  if [[ "$tag" == "<${stag}" ]] ; then
     (( open++ ))
   else
     (( open--))
