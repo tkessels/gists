@@ -8,12 +8,12 @@ if ! (which gsettings 1>/dev/null) ; then
 fi
 
 #test for existing mate settings
-if (gsettings get org.mate.media-handling automount 1>/dev/null) ; then
+if (gsettings get org.mate.media-handling automount 1>/dev/null 2>/dev/null) ; then
   mate=1
 fi
 
 #test for existing gnome settings
-if (gsettings get org.gnome.desktop.media-handling automount 1>/dev/null) ; then
+if (gsettings get org.gnome.desktop.media-handling automount 1>/dev/null 2>/dev/null) ; then
   gnome=1
 fi
 
