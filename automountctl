@@ -28,29 +28,29 @@ fi
 case ${command} in
 on)
   echo "turning on"
-  if [ $mate -eq "1" ] ; then
+  if [[ $mate -eq "1" ]] ; then
     gsettings set org.mate.media-handling automount true
     gsettings set org.mate.media-handling automount-open true
   fi
-  if [ $gnome -eq "1" ] ; then
+  if [[ $gnome -eq "1" ]] ; then
     gsettings set org.gnome.desktop.media-handling automount true
     gsettings set org.gnome.desktop.media-handling automount-open true
   fi
   ;;
 off)
   echo "turning off"
-  if [ $mate -eq "1" ] ; then
+  if [[ $mate -eq "1" ]] ; then
     gsettings set org.mate.media-handling automount false
     gsettings set org.mate.media-handling automount-open false
   fi
-  if [ $gnome -eq "1" ] ; then
+  if [[ $gnome -eq "1" ]] ; then
     gsettings set org.gnome.desktop.media-handling automount false
     gsettings set org.gnome.desktop.media-handling automount-open false
   fi
   ;;
 *)
   echo "Status:"
-  if [ $mate -eq "1" ] ; then
+  if [[ $mate -eq "1" ]] ; then
     echo "#   mate-settings found:"
     echo "    - org.mate.media-handling automount :"
     echo -n "       "
@@ -60,7 +60,7 @@ off)
     gsettings get org.mate.media-handling automount-open
   fi
 
-  if [ $gnome -eq "1" ] ; then
+  if [[ $gnome -eq "1" ]] ; then
     echo "#   gnome-settings found:"
     echo "    - org.gnome.desktop.media-handling automount :"
     echo -n "       "
