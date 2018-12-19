@@ -3,6 +3,8 @@ import sys
 import hashlib
 import os
 import numpy as np
+import math
+import argparse
 
 def even_select(N, M):
     if M > N/2:
@@ -18,32 +20,38 @@ def even_select(N, M):
 
     return cut
 
-def get_offsets(chunksize, spread):
-    selection=even_select(100,spread)
-    for i in range(0,100):
+def get_offsets(blocksize, blockcount,blocks_to_hash):
+    selection=even_select(blockcount,blocks_to_hash)
+    for i in range(0,blockcount):
         if selection[i]==0:
-            offset=int(chunksize*i)
+            offset=int(blocksize*i)
             yield offset
 
-def get_blocks(filename,spread,blocksize):
-    filesize=os.path.getsize(filename)
-    chunksize=filesize/100
-    with open(filename,'rb') as infile:
-        for of in get_offsets(chunksize,spread):
+
+def get_hash(file,hashalgo,spread):
+    h=hashlib.new(hashalgo)
+    filesize=os.path.getsize(file.name)
+    blocksize=h.block_size*65535
+    blockcount=math.ceil(filesize/blocksize)
+    blocks_to_hash=math.ceil(blockcount*spread/100)
+    if filesize>blocksize:
+        for of in get_offsets(blocksize,blockcount,blocks_to_hash):
             infile.seek(of)
-            tohashsize=chunksize
-            while tohashsize > 0:
-                yield infile.read(blocksize)
-                tohashsize-=h.block_size
+            h.update(file.read(blocksize))
+    else:
+        h.update(file.read(blocksize))
 
+    result="{};{};{};{};{}".format(h.hexdigest(),spread,filesize,hashalgo,file.name)
+    return result
 
+parser = argparse.ArgumentParser(description='Sparsly hash large files. Only a given percentage of the file is actualy hashed.')
+parser.add_argument('-p',metavar='N', action="store",dest="spread",type=int, nargs='?',default=10,help='percentage of file to hash. 0 < N < 100 (default=10)')
+parser.add_argument('-c', action="store",dest="hashalgo",nargs='?',default="md5",help='select an hashalgorithm (default=md5)')
+parser.add_argument('file', type=argparse.FileType('rb'), nargs='+')
+args=parser.parse_args()
 
-hashalgo="md5"
-filename=sys.argv[2]
-spread=int(sys.argv[1]) #percentage of hash
-h=hashlib.new(hashalgo)
-
-blocksize=h.block_size*4
-for block in get_blocks(filename,spread,blocksize):
-    h.update(block)
-print(h.hexdigest())
+hashalgo=args.hashalgo
+spread=args.spread
+for infile in args.file:
+    hashvalue=get_hash(infile,hashalgo,spread)
+    print(hashvalue)
