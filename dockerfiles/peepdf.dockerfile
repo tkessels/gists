@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y \
   libemu2 \
   pkg-config \
   autoconf \
+  pdftk \
+  imagemagick \
   python-pil \
   python-pip ; \
   pip install pylibemu ; \
