@@ -29,8 +29,14 @@ RUN pip install pylibemu
 RUN chmod +x /opt/didierstevenssuite/*py
 RUN ln -s /opt/peepdf/peepdf.py /bin/peepdf.py
 RUN chmod +x /bin/peepdf.py
+RUN chmod 777 -R /opt/peepdf/
 
 ENV PATH="/opt/didierstevenssuite/:${PATH}"
+
+RUN groupadd -g 1000 -r user && \
+useradd -u 1000 -r -g user -d /home/user -s /sbin/nologin -c "Nonroot User" user && \
+mkdir /home/user && \
+chown -R user:user /home/user
 
 RUN groupadd -g 1001 -r nonroot && \
 useradd -u 1001 -r -g nonroot -d /home/nonroot -s /sbin/nologin -c "Nonroot User" nonroot && \
