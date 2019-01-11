@@ -16,7 +16,7 @@ with open(sys.argv[1],'rb') as f:
 params = {'apikey': api_key, 'resource': hash.hexdigest()}
 headers = {
   "Accept-Encoding": "gzip, deflate",
-  "User-Agent" : "gzip,  My Python requests library example client or username"
+  "User-Agent" : "gzip,python_requests,scan_vt.py"
   }
 
 response = requests.get('https://www.virustotal.com/vtapi/v2/file/report', params=params, headers=headers)
@@ -31,4 +31,3 @@ if json_response["response_code"]:
   print("{}{}{}{}{}/{}{}{}".format(sys.argv[1],out_sep,hash.hexdigest(),out_sep,json_response["positives"],json_response["total"],out_sep,json_response["permalink"]))
 else:
   print("{}{}{}{}{}".format(sys.argv[1],out_sep,hash.hexdigest(),out_sep,out_sep))
-
