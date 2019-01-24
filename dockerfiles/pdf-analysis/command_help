@@ -1,0 +1,54 @@
+## pdfid.py
+#Überblick über Inhalt eines PDFs
+pdfid.py <pdf-file>
+
+#Um einen ganzen Ordner mit PDFs zu analysieren
+pdfid.py -s <dir>
+
+#Verarbeitung erzwingen auch wenn Datei defekt
+pdfid.py -f <pdf-file>
+
+
+## peepdf.py
+#Überblick ähnlich pdfid.py
+peepdf.py <pdf-file>
+
+#Verarbeitung erzwingen auch wenn Datei defekt ist z.B: bei der Fehlermeldung:
+#   Error: An error has occurred while parsing an indirect object!!
+peepdf.py -f <pdf-file>
+
+#starten der interactiven peepdf-shell (empfohlen)
+peepdf.py -f -i <pdf-file>
+
+# in der shell zeigt die Eingabe von "help" weitere Informationen an
+
+
+## pdf-parser.py
+#Überblick über Struktur des Dokuments
+pdf-parser.py <pdf-file>
+
+#Auswahl eines Elements
+pdf-parser.py -o <obj-ID> <pdf-file>
+
+#Hashen der Elemente
+pdf-parser.py -H <pdf-file>
+pdf-parser.py -H -o <obj-id> <pdf-file>
+
+#Exportieren eines Objects (z.B. word.doc)
+pdf-parser.py -d <extracted-filename> -f -o <obj-id> <pdf-file>
+
+
+## pdftk
+#Dateien extrahieren
+pdftk <pdf-file> unpack_files
+
+#PDF - Plätten (javascript und andere objekte entfernen)
+#Dieser Prozess ist anschließend zu überprüfen
+pdftk <pdf-file> cat output flattened_<original_filename>
+
+#PDF - reparieren
+pdftk <pdf-file> output fixed<original_filename>
+
+##convert
+#PDF - in TIFF Plätten
+convert <pdf-file> <original_filename>.tiff

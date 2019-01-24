@@ -25,13 +25,18 @@ RUN git clone https://github.com/buffer/pyv8.git ; cd pyv8 ; python setup.py bui
 RUN git clone https://github.com/buffer/libemu.git ; cd libemu ; autoreconf -v -i && ./configure --prefix=/opt/libemu && make install && cd .. && rm -rf libemu2
 RUN pip install pylibemu
 
+RUN apt-get update && apt-get install -y exiftool ; rm -rf /var/lib/apt/lists/*
 
 RUN chmod +x /opt/didierstevenssuite/*py
 RUN ln -s /opt/peepdf/peepdf.py /bin/peepdf.py
 RUN chmod +x /bin/peepdf.py
 RUN chmod 777 -R /opt/peepdf/
+RUN sed -i '/PDF/s/"none"/"read|write"/' /etc/ImageMagick-6/policy.xml
 
 ENV PATH="/opt/didierstevenssuite/:${PATH}"
+ADD README /opt/README
+ADD command_help /opt/command_help
+RUN echo 'cat /opt/README' >> /etc/bash.bashrc
 
 RUN groupadd -g 1000 -r user && \
 useradd -u 1000 -r -g user -d /home/user -s /sbin/nologin -c "Nonroot User" user && \

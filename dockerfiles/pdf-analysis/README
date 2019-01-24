@@ -1,0 +1,11 @@
+README - pdfanalysis
+Dieser Container enthält Tools um PDFs zu analysieren:
+
+pdfid.py - Schnelle Übersicht über PDF-Aufbau.
+pdf-parser.py - Zerlegen und extrahieren von PDF-Elementen
+peepdf.py - PDF - Analyse Framework mit Javascript Analyse
+pdftk - Tool um das PDF zu "flatten"
+convert - ImageMagick Tool zum convertieren
+
+Für Kommandobeispiele /opt/command_help lesen.
+Der Nutzer innerhalb des Containers braucht Schreibrechte auf das gemountete Verzeichnis.
