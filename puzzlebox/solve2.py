@@ -114,11 +114,27 @@ def printstats():
             if x>5:
                 break
 
+def parallel_pool_init():
+    global stats
+    global solutions
+    stats=dict()
+    solutions=list()
+
+
+def parallel_solve(cube):
+    global all_rotations
+    all_rotations=generate_rotations(piece)
+    pieces=set(all_rotations.copy())
+    first_position=(0,0,0)
+    while len(pieces)>0:
+        piece=pieces.pop()
+        if put_piece_in_cube(piece, cube, first_position, index):
+            solve(cube, 2,):
+
 
 def solve(cube,index):
-    #make copy of cube
-    printstats()
-
+    global stats
+    global solutions
     global all_rotations
     pieces=set(all_rotations.copy())
 
@@ -128,7 +144,8 @@ def solve(cube,index):
     if empty_pos==None:
         pprint.pprint(cube)
         draw_cube(cube)
-        return True
+        solutions.append(cube)
+        return False
     else:
         (x,y,z)=empty_pos
         while len(pieces)>0:
@@ -145,16 +162,13 @@ def solve(cube,index):
         return False
 
 
-maxindex=0
-stat_counter=0
-stats=dict()
-last_stats=dict()
-def main():
+# maxindex=0
+# stat_counter=0
+# stats=dict()
+# last_stats=dict()
 
-    global all_rotations
-    all_rotations=generate_rotations(piece)
-    print(len(all_rotations))
-    solve(init_cube(),1)
+def main():
+    parallel_solve(init_cube())
 
 if __name__ == '__main__':
     # profile.run('main()')
