@@ -6,7 +6,7 @@ from os import walk
 from chardet.universaldetector import UniversalDetector
 import re
 import mmh3
-from bs4 import UnicodeDammit
+# from bs4 import UnicodeDammit
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 
@@ -52,16 +52,10 @@ def get_file_enconding(file):
                 break
         detector.close()
 
-        # daf.seek(0)
-        # dammit = UnicodeDammit(daf.read(1000))
-        # print(dammit.original_encoding)
-
-
-
         r=detector.result
         return r["encoding"]
 
-patter=re.compile("([^@]+)@([^@]+\.[^@]+)(:|;)(.*)")
+patter=re.compile("([^@]+)@([^@]+\.[^@]+)(\s|:|;)(.*)")
 
 def extract_email(line):
     global patter
@@ -76,14 +70,9 @@ def strip_badbytes(b,encoding):
     return (b.decode(encoding, errors='ignore')).strip()
 
 def get_files(dir):
- f = []
- path=""
  for (dirpath, dirnames, filenames) in walk(dir):
-  f.extend(filenames)
-  path=dirpath
-  break
- for x in f:
-  yield os.path.join(path,x)
+  for x in filenames:
+   yield os.path.join(dirpath,x)
 
 def get_lines(file):
     encoding=get_file_enconding(file)
@@ -92,10 +81,18 @@ def get_lines(file):
             yield(strip_badbytes(line,encoding))
 
 def get_parsable_lines(file):
+    success=1 #initialized with 1 to preven div/0
+    failure=1
     for line in get_lines(file):
         doc=extract_email(line)
         if doc:
+            success+=1
             yield doc
+        else:
+            failure+=1
+    success_rate=(success/(success+failure))
+    with open("processed_files",'a+') as file_log:
+        file_log.write("{};{}\n".format(file,success_rate))
 
 
 def create_doc(file):
@@ -113,17 +110,15 @@ def create_doc(file):
 
 
 
-def set_data(input_file, index_name = "leaks", doc_type_name = "credential"):
+def set_data(input_file, index_name = "leak_col1", doc_type_name = "credential"):
     for doc in create_doc(input_file):
-        id=mmh3.hash128(",".join((doc["user"],doc["domain"],doc["password"])),signed=False)
+        id=hex(mmh3.hash128(",".join((doc["user"],doc["domain"],doc["password"])),12,signed=False)%1000000000000000000000)
         yield {
-            "_index": index_name,
-            "_type": doc_type_name,
-            "_id": id,
-            "_source": doc
+        "_index": index_name,
+        "_type": doc_type_name,
+        "_id": id,
+        "_source": doc
         }
-        # except Exception as ex:
-        #     pass
 
 def load(es, input_file, **kwargs):
 	print('[*] Indexing file: %s' % input_file)
