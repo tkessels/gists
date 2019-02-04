@@ -78,12 +78,33 @@ def strip_badbytes(b, encoding):
 
 
 def get_files(dir):
+    files_in_log={}
+    global threshold
+    try:
+        with open(log_filename,'r') as file_log:
+            for line in file_log.readlines():
+                try:
+                    filedata=line.split(";")
+                    files_in_log[filedata[0]]=float(filedata[1])
+                except:
+                    print("Can't parse Line")
+                    pass
+    except:
+        print("Can't open Logfile")
+        pass
+
     for (dirpath, dirnames, filenames) in walk(dir):
         for file in filenames:
             full_filename=os.path.join(dirpath, file)
+            if full_filename in files_in_log and files_in_log[full_filename] > threshold:
+                print('[~] Skipping file [Already Parsed]: %s' % full_filename)
+                continue
+
             encoding=get_file_enconding(full_filename)
             if encoding:
                 yield encoding, full_filename
+            else:
+                print('[~] Skipping file [Unknown Encoding]: %s' % full_filename)
 
 
 def get_lines(file,encoding=None):
@@ -96,8 +117,8 @@ def get_lines(file,encoding=None):
 
 def get_parsable_lines(file):
     global log_filename
-    success = 1  # initialized with 1 to preven div/0
-    failure = 1
+    success = 0  # initialized with 1 to preven div/0
+    failure = 0
     for line in get_lines(file):
         doc = extract_email(line)
         if doc:
@@ -106,6 +127,7 @@ def get_parsable_lines(file):
         else:
             failure += 1
     success_rate = (success / (success + failure))
+    print('[+] Done with file: {} ({})'.format(file,success_rate))
     with open(log_filename, 'a+') as file_log:
         file_log.write("{};{}\n".format(file, success_rate))
 
@@ -124,28 +146,42 @@ def create_doc(file):
             "containsUpperCase" :   check_upper(cred[2]),
             "containsSpecial"   :   check_special(cred[2])
            }
+        username_split=cred[0].split(";")
+        if len(username_split)==2:
+            doc["username"]=username_split[0]
+            doc["user"]=username_split[1]
         id_hash=hex(mmh3.hash128(",".join((doc["user"], doc["domain"], doc["password"])), 12,signed=False) % 1000000000000000000000)
         yield id_hash, doc
 
 
 def process_file(input_file):
-    global index_prefix, doc_type_name
-    filenamehash=hex(mmh3.hash128(input_file, 12,signed=False) % 1000000000000000000000)
+    global index, doc_type_name
     for id_hash, doc in create_doc(input_file):
         yield {
-            "_index": "{}_{}".format(index_prefix, filenamehash),
+            "_index": index,
             "_type": doc_type_name,
             "_id": id_hash,
             "_source": doc
         }
 
 
-index_prefix = "leak_col1"
+index = "leak_col1"
 doc_type_name = "credential"
 log_filename = "processed_files"
+threshold = 0 #threshold for reparsing an already parsed file
 
-es = Elasticsearch()
+def main():
+    es = Elasticsearch()
+    dir=sys.argv[1]
+    for encoding, data in get_files(dir):
+        count = es.count(index=index, doc_type=doc_type_name, body={ "query": {"match_all" : { }}})
+        pre=count["count"]
+        print('[*] Indexing file: %s' % data)
+        success, _ = bulk(es, process_file(data), request_timeout=60, raise_on_exception=False)
+        count = es.count(index=index, doc_type=doc_type_name, body={ "query": {"match_all" : { }}})
+        post=count["count"]
+        print('[=] Added {} Documents with {}'.format(post-pre,data))
 
-for encoding, data in get_files(sys.argv[1]):
-    print('[*] Indexing file: %s' % data)
-    success, _ = bulk(es, process_file(data), request_timeout=60, raise_on_exception=False)
+
+
+main()
