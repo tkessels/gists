@@ -1,0 +1,63 @@
+PUT _template/template_1
+{
+  "index_patterns" : ["leak*"],
+  "settings" : {
+      "number_of_shards" : 2,
+      "number_of_replicas" : 0,
+      "refresh_interval": "60s"
+  },
+
+  "mappings": {
+    "credential": {
+      "properties": {
+        "containsDigits": {
+          "type": "boolean"
+        },
+        "containsLowerCase": {
+          "type": "boolean"
+        },
+        "containsSpecial": {
+          "type": "boolean"
+        },
+        "containsUpperCase": {
+          "type": "boolean"
+        },
+        "domain": {
+          "type": "keyword",
+          "ignore_above": 512,
+          "norms" : false
+        },
+        "file": {
+          "type": "keyword",
+          "ignore_above": 1024,
+          "norms" : false
+        },
+        "length": {
+          "type": "short"
+        },
+        "password": {
+          "type": "keyword",
+          "norms" : false,
+          "ignore_above": 512
+        },
+        "passwordMask": {
+          "type": "keyword",
+          "norms" : false,
+          "ignore_above": 512
+        },
+        "user": {
+          "type": "keyword",
+          "norms" : false,
+          "ignore_above": 512
+        },
+        "username": {
+          "type": "keyword",
+          "norms" : false,
+          "ignore_above": 512
+        }
+      }
+    }
+  }
+
+
+}
