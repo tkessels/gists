@@ -12,13 +12,11 @@ from multiprocessing import Pool,Lock
 import multiprocessing
 import hashlib
 import json
-
 import argparse
 
 
-
-
 lock = Lock()
+
 
 def log_to_file(text):
     global log_filename
@@ -27,8 +25,9 @@ def log_to_file(text):
             file_log.write("{}\n".format(text))
 
 def log_to_console(text):
+    ps=multiprocessing.current_process()
     with lock: # thread blocks at this line until it can obtain lock
-        print(text)
+        print("[{}]:{}".format(ps.pid,text))
 
 
 def get_mask(s):
@@ -143,7 +142,7 @@ def get_parsable_lines(file,encoding):
         else:
             failure += 1
     success_rate = (success / (success + failure))
-    log_to_console('[+] Done with file: {} ({})'.format(file,success_rate))
+    log_to_console('[+] Done parsing file: {} ({})'.format(file,success_rate))
     log_to_file("{};{}".format(file, success_rate))
 
 
@@ -152,16 +151,18 @@ def get_hash(text):
     return hash_object.hexdigest()
     # return hex(mmh3.hash(text, 12, signed=False)).split("x")[1]
 
+
 def get_user_pw_hash(text):
     return get_hash(text)
     # return hex(mmh3.hash128(text, 12,signed=False) % 1000000000000000).split("x")[1]
+
 
 def create_doc(file,encoding):
     for cred in get_parsable_lines(file,encoding):
         doc = {
             "user"              :   cred[0],
             "domain"            :   cred[1],
-            "password"          :   cred[2],
+            "password"          :   cred[2][:129],
             "file"              :   file,
             "length"            :   len(cred[2]),
             "passwordMask"      :   get_mask(cred[2]),
@@ -191,26 +192,24 @@ def process_file(input_file,encoding):
         }
 
 
-
-
 def index_file(input_file):
-    ps=multiprocessing.current_process()
     encoding=get_file_enconding(input_file)
     if encoding:
         es = Elasticsearch(["172.16.1.141"],http_compress=True)
         # count = es.count(index=index, doc_type=doc_type_name, body={ "query": {"match_all" : { }}})
         # pre=count["count"]
-        log_to_console('[{}:*] Indexing file: {}'.format(ps.pid,input_file))
+        log_to_console('[*] Indexing file: {}'.format(input_file))
         try:
-            success, _ = bulk(es, process_file(input_file,encoding), chunk_size=10000, request_timeout=60, raise_on_error=True, raise_on_exception=False)
-            # es.bulk()
+            success, _ = bulk(es, process_file(input_file,encoding), chunk_size=10000, initial_backoff=60, max_retries=3, request_timeout=60, raise_on_error=False, raise_on_exception=True)
+            log_to_console('[!] Indexing done: {} [{} lines committed]'.format(input_file,success))
         except Exception as e:
-            log_to_console('[{}:!] Indexing failed for: {}\n[{}:!] REASON: {}'.format(ps.pid,input_file,e.message))
+            log_to_console('[!] Indexing failed for: {}\n[!] REASON:{}'.format(input_file,str((e.errors[0]))))
         # count = es.count(index=index, doc_type=doc_type_name, body={ "query": {"match_all" : { }}})
         # post=count["count"]
         # log_to_console('[{}:=] Added {} Documents with {}'.format(ps.pid,post-pre,input_file))
     else:
-        log_to_console('[{}:~] Skipping file [Unknown Encoding]: {}'.format(ps.pid,input_file))
+        log_to_console('[~] Skipping file [Unknown Encoding]: {}'.format(input_file))
+
 
 def bench_file(input_file):
     ps=multiprocessing.current_process()
@@ -248,6 +247,7 @@ index=""
 doc_type_name = "credential"
 log_filename = "processed_files"
 threshold = -1 #threshold for reparsing an already parsed file
+
 
 def main():
     global index
