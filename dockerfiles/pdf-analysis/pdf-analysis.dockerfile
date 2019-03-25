@@ -48,6 +48,8 @@ useradd -u 1001 -r -g nonroot -d /home/nonroot -s /sbin/nologin -c "Nonroot User
 mkdir /home/nonroot && \
 chown -R nonroot:nonroot /home/nonroot
 
+RUN pip install olefile
+
 WORKDIR /home/nonroot/
 USER nonroot
 WORKDIR /home/nonroot/
