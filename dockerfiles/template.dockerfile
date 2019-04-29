@@ -3,6 +3,7 @@ FROM debian:stretch
 
 MAINTAINER tabledevil
 
+#RUN apt-get update && apt-get install -y exiftool ; rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -g 999 user && \
     useradd -r -u 999 -g user user
