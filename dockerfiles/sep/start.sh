@@ -1,13 +1,14 @@
 #!/bin/bash
-echo "stage: ${1}"
 case "${1}" in
   shell )
+    echo "stage: ${1}"
     service rtvscand start
     echo "Usage:"
     echo "sav manualscan -c <file>"
     /bin/bash
     ;;
   version )
+    echo "stage: ${1}"
     service rtvscand start
     sleep 5
     sep_dev=$(sav info -d | tr -d '\r\n')
@@ -25,6 +26,7 @@ case "${1}" in
 
     ;;
   scan )
+    echo "stage: ${1}"
     service rtvscand start
     sleep 5
     sav manualscan -c /data
@@ -33,6 +35,7 @@ case "${1}" in
     cat /root/tag
     ;;
   debug )
+    echo "stage: ${1}"
     /bin/bash
     ;;
 esac

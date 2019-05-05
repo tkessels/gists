@@ -1,5 +1,5 @@
 #!/bin/bash
-docker build -t tabledevil/sep:latest -f sep_dev.dockerfile  .
+docker build --no-cache -t tabledevil/sep:latest -f sep_dev.dockerfile  .
 tag=$(docker run -it tabledevil/sep:latest version | grep -Pio "(?<=Dockertag: )[\d._]+" )
 echo "NEW TAG : ${tag}"
 docker tag tabledevil/sep tabledevil/sep:${tag}
