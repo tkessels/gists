@@ -1,0 +1,16 @@
+version: '2'
+services:
+  droppy:
+    container_name: droppy
+    image: silverwind/droppy
+    environment:
+      #user for filewrites
+      - UID=1000
+      - GID=1000
+    ports:
+      - '8989:8989'
+
+    volumes:
+      - ./config:/config
+      - ./data:/files
+    # restart: unless-stopped
