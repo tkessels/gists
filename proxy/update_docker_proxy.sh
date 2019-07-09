@@ -1,7 +1,9 @@
 #!/bin/bash
-proxy_ip="192.168.x.x"
+#proxy_ip="192.168.x.x"
 proxy_port="8080"
 
+echo -n "Proxy_IP: "
+read proxy_ip
 echo -n "Username: "
 read username
 echo -n "Password: "
