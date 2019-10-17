@@ -25,3 +25,32 @@ alias remnux_jsdetox_start='sudo docker run --rm --name critsy -it --dns=192.168
 alias remnux_jsdetox_stop="sudo docker stop critsy"
 alias drit='docker run -it --rm'
 function docker_killall() { docker rm $(docker stop $(docker ps -a -q --filter ancestor="${1}" --format="{{.ID}}")) ; }
+alias mv="mv -vi"
+alias cp="cp -vi"
+alias nasmount="pushd . ; sudo mount ~/mnt/nas ; cd ~/mnt/nas"
+alias nasunmount="sudo umount ~/mnt/nas"
+alias kali='docker run --rm -it -v ${workdir-`pwd`}:/root/workdir kali'
+alias powershell='docker run --rm -it -v ${workdir-`pwd`}:/data powershell pwsh'
+alias remnux_viper='docker run --rm -it --dns=192.168.130.1 -v ${workdir-`pwd`}:/home/nonroot/workdir remnux/viper bash'
+alias remnux_pescanner='docker run --rm -it --dns=192.168.130.1 -v ${workdir-`pwd`}:/home/nonroot/workdir remnux/pescanner bash'
+alias remnux_rekall='docker run --rm -it -p 8000:8000 --dns=192.168.130.1 -v ${workdir-`pwd`}:/home/nonroot/files remnux/rekall bash'
+alias remnux_mastiff='sudo docker run --rm -it -v ${workdir-`pwd`}:/home/nonroot/workdir remnux/mastiff'
+alias remnux_msf='docker run --rm -it -p 443:443 -v ~/.msf4:/root/.msf4 -v /tmp/msf:/tmp/data remnux/metasploit'
+alias remnux_vol='docker run --rm -it -v ${workdir-`pwd`}:/home/nonroot/memdumps remnux/volatility bash'
+alias remnux_thug='sudo docker run --rm -it --dns=192.168.130.1 -v /var/log/docker/thug_logs:/home/thug/logs remnux/thug ./thug.py -F '
+alias remnux_jsdetox_start="sudo docker run --rm --name jsdetoxy --rm -p 3000:3000 remnux/jsdetox"
+alias remnux_jsdetox_stop="sudo docker stop jsdetoxy"
+alias remnux_cyberchef_start="sudo docker run --rm --name cyberchefy -d -p 8080:80 remnux/cyberchef"
+alias remnux_cyberchef_stop="sudo docker stop cyberchefy"
+alias remnux_crits_start='sudo docker run --rm --name critsy -it -v ${workdir-`pwd`}:/home/nonroot/workdir -p 8443:8443 remnux/crits'
+alias remnux_crits_stop="sudo docker stop critsy"
+alias docker_status="docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock moncho/dry"
+alias pwsh=powershell
+#alias curl="curl -U 10341520 -x 192.168.193.6:8080"
+alias dritpwro='docker run -it --rm -v "$(pwd)":/data:ro'
+alias dritpw='docker run -it --rm -v "$(pwd)":/data'
+alias drit='docker run -it --rm'
+function dockerfa() {
+  [[ $# -eq 0 ]] && wpd=$(readlink -f . ) || wpd=$(readlink -f "${1}")
+  docker run -it --rm -v "${wpd}":/data tabledevil/file-analysis
+}
