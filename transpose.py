@@ -1,6 +1,7 @@
 import pprint
 import math
 
+
 secret="OUHRSTHFSOENOFETURFELIRFTSNEMOEEMELNTARETOKCAETBFIHFTTTNMEELEEOHYBAERORCRSEDNCEUUTHITOYRSTEDSBEIEOTNLRMOEFPOHHAYLAGXYISNIARAUABGBURILFERPEEHTECDINNDITHFFIEHTKESYTDHEREOALGNABSMWEHVEFSOAMETAOCRFTAHEOFSINAMEOTRNGRINTHFFIEHTIEGMELNTSTEOMCOHEOWTEWREAIDANHTRARARTEHEETVFIYREAHVSAONDPROSTRAEUOYCTTTHWISANMUHETENTIISEDHETSUSENTEITNG   OOLEEB L"
 col_key="EJALMVWUSTRPOBY" # (16)missing 1 char
 row_key="GHPTYPAMTAPQRNDHD" # (21) missing 4 chars one of which is 'D'
@@ -18,13 +19,12 @@ def cell_length(text_length,key_length):
 def padded_length(text_length,key_length):
     return cell_length(text_length,key_length)*key_length
 
-def revert_key(key):
-    return [x[0] for x in sorted(enumerate(key), key=lambda x: x[1])]
+def revert_key(enc_key):
+    return [x[0] for x in sorted(enumerate(enc_key), key=lambda x: x[1])]
 
-def mosh(text,key):
-    tmp=sorted(zip(text,key), key=lambda x: x[1])
+def mosh(text,enc_key):
+    tmp=sorted(zip(text,enc_key), key=lambda x: x[1])
     return [x[0] for x in tmp]
-
 
 def cols(text,key_length):
     # col_length=cell_length(len(text),key_length)
@@ -74,20 +74,14 @@ def prows(a,header=None):
 
 
 def encode(text,key):
-    text=text.ljust(math.ceil(len(text)/len(key))*len(key),'_')
-    # print("encoding <%s>"%text)
+    text=text.ljust(padded_length(len(text),len(key)),'_')
     columnized_text=cols(text,len(key))
-    # pcols(columnized_text)
     shuffled_colums=mosh(columnized_text,key)
-    # pcols(shuffled_colums)
     return rows_to_str(shuffled_colums)
 
 def decode(text,key):
-    # print("decoding <%s>"%text)
     row_data=rows(text,cell_length(len(text), len(key)))
-    # prows(row_data)
     reorderd=mosh(row_data,revert_key(key))
-    # prows(reorderd)
     return cols_to_str(reorderd)
 
 
@@ -109,13 +103,20 @@ def get_row_keys():
     for x in row_alpha:
         for y in row_alpha:
             for z in row_alpha:
-                for d in row_alpha:
-                    yield(row_key+d+x+y+z)
+                # for d in row_alpha:
+                #     yield(row_key+d+x+y+z)
+                yield(row_key+"D"+x+y+z)
+                yield(row_key+x+"D"+y+z)
+                yield(row_key+x+y+"D"+z)
+                yield(row_key+x+y+z+"D")
 
-                # yield(row_key+"D"+x+y+z)
-                # yield(row_key+x+"D"+y+z)
-                # yield(row_key+x+y+"D"+z)
-                # yield(row_key+x+y+z+"D")
+def nub(it):
+    seen = set()
+    for x in it:
+        if x not in seen:
+            yield x
+            seen.add(x)
+
 
 
 def decryptor():
