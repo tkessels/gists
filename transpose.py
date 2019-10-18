@@ -2,13 +2,10 @@ import pprint
 import math
 
 secret="OUHRSTHFSOENOFETURFELIRFTSNEMOEEMELNTARETOKCAETBFIHFTTTNMEELEEOHYBAERORCRSEDNCEUUTHITOYRSTEDSBEIEOTNLRMOEFPOHHAYLAGXYISNIARAUABGBURILFERPEEHTECDINNDITHFFIEHTKESYTDHEREOALGNABSMWEHVEFSOAMETAOCRFTAHEOFSINAMEOTRNGRINTHFFIEHTIEGMELNTSTEOMCOHEOWTEWREAIDANHTRARARTEHEETVFIYREAHVSAONDPROSTRAEUOYCTTTHWISANMUHETENTIISEDHETSUSENTEITNG   OOLEEB L"
-col_key="EJALMVWUSTRPOBY_" # (16)missing 1 char
-row_key="GHPTYPAMTAPQRNDHD____" # (21) missing 4 chars one of which is 'D'
-# KLINGON_ALPHABET="ABDEHIJLMNOPQRSTUVWY"
-# HIERACH_ALPHABET="ABDFGHIJKMNPQRSTUWYZ"
-# cleartext="ABDEFGHIJKLMOPQRSTUVWXYZ"
-# my_first_col_key="TEST"
-# my_row_key="HALLOABBIEGALE"
+col_key="EJALMVWUSTRPOBY" # (16)missing 1 char
+row_key="GHPTYPAMTAPQRNDHD" # (21) missing 4 chars one of which is 'D'
+col_alpha="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+row_alpha="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
 
@@ -78,19 +75,19 @@ def prows(a,header=None):
 
 def encode(text,key):
     text=text.ljust(math.ceil(len(text)/len(key))*len(key),'_')
-    print("encoding <%s>"%text)
+    # print("encoding <%s>"%text)
     columnized_text=cols(text,len(key))
-    pcols(columnized_text)
+    # pcols(columnized_text)
     shuffled_colums=mosh(columnized_text,key)
-    pcols(shuffled_colums)
+    # pcols(shuffled_colums)
     return rows_to_str(shuffled_colums)
 
 def decode(text,key):
-    print("decoding <%s>"%text)
+    # print("decoding <%s>"%text)
     row_data=rows(text,cell_length(len(text), len(key)))
-    prows(row_data)
+    # prows(row_data)
     reorderd=mosh(row_data,revert_key(key))
-    prows(reorderd)
+    # prows(reorderd)
     return cols_to_str(reorderd)
 
 
@@ -104,4 +101,29 @@ def decross(text,key_rows,key_cols):
     matrix=rows(text,len(key_cols))
     prows(matrix,key_rows)
 
-decross(secret,row_key,col_key)
+def get_col_keys():
+    for x in col_alpha:
+        yield col_key+x
+
+def get_row_keys():
+    for x in row_alpha:
+        for y in row_alpha:
+            for z in row_alpha:
+                for d in row_alpha:
+                    yield(row_key+d+x+y+z)
+
+                # yield(row_key+"D"+x+y+z)
+                # yield(row_key+x+"D"+y+z)
+                # yield(row_key+x+y+"D"+z)
+                # yield(row_key+x+y+z+"D")
+
+
+def decryptor():
+    for col_key in get_col_keys():
+        for row_key in get_row_keys():
+            text=encode(encode(secret,col_key),row_key)
+            yield "{};{};{}".format(row_key,col_key,text)
+
+with open("output3.txt",'w') as f:
+    for possiblematch in decryptor():
+        f.write(possiblematch+'\n')
