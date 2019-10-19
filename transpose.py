@@ -1,5 +1,13 @@
+#!/usr/bin/env python3
 import pprint
 import math
+import itertools
+try:
+    import tqdm
+    has_tqdm=True
+except ImportError:
+    print("Install tqdm for Progressbar! (pip3 install tqdm)")
+    has_tqdm=False
 
 
 secret="OUHRSTHFSOENOFETURFELIRFTSNEMOEEMELNTARETOKCAETBFIHFTTTNMEELEEOHYBAERORCRSEDNCEUUTHITOYRSTEDSBEIEOTNLRMOEFPOHHAYLAGXYISNIARAUABGBURILFERPEEHTECDINNDITHFFIEHTKESYTDHEREOALGNABSMWEHVEFSOAMETAOCRFTAHEOFSINAMEOTRNGRINTHFFIEHTIEGMELNTSTEOMCOHEOWTEWREAIDANHTRARARTEHEETVFIYREAHVSAONDPROSTRAEUOYCTTTHWISANMUHETENTIISEDHETSUSENTEITNG   OOLEEB L"
@@ -7,11 +15,6 @@ col_key="EJALMVWUSTRPOBY" # (16)missing 1 char
 row_key="GHPTYPAMTAPQRNDHD" # (21) missing 4 chars one of which is 'D'
 col_alpha="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 row_alpha="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-
-
-#As we know from the cold wars in the galaxy with the KLI, the Mondoshiva used the double transposition cipher with first/inner column and second/outer row transformation for encryption to secure the most powerful information. Furthermore, they usually used the longer keys for the rows
-
 
 def cell_length(text_length,key_length):
     return math.ceil(text_length/key_length)
@@ -72,7 +75,6 @@ def prows(a,header=None):
         counter+=1
         print("%s : %s"%(heading,x))
 
-
 def encode(text,key):
     text=text.ljust(padded_length(len(text),len(key)),'_')
     columnized_text=cols(text,len(key))
@@ -83,17 +85,6 @@ def decode(text,key):
     row_data=rows(text,cell_length(len(text), len(key)))
     reorderd=mosh(row_data,revert_key(key))
     return cols_to_str(reorderd)
-
-
-def decross(text,key_rows,key_cols):
-    #revert row transformation
-    matrix_cells=len(key_rows)*len(key_cols)
-    if len(text) != matrix_cells:
-        print("!!TEXT HAD TO BE PADDED!!")
-        text=text.ljust(matrix_cells,'_')
-    #generate rows with a length of the column-key
-    matrix=rows(text,len(key_cols))
-    prows(matrix,key_rows)
 
 def get_col_keys():
     for x in col_alpha:
@@ -110,21 +101,25 @@ def get_row_keys():
                 yield(row_key+x+y+"D"+z)
                 yield(row_key+x+y+z+"D")
 
-def nub(it):
-    seen = set()
-    for x in it:
-        if x not in seen:
-            yield x
-            seen.add(x)
-
-
+def normalize_keys(key_generator):
+    k = [revert_key(revert_key(x)) for x in key_generator]
+    k.sort()
+    return list(k for k,_ in itertools.groupby(k))
 
 def decryptor():
-    for col_key in get_col_keys():
-        for row_key in get_row_keys():
-            text=encode(encode(secret,col_key),row_key)
-            yield "{};{};{}".format(row_key,col_key,text)
+    rowkeys=normalize_keys(get_row_keys())
+    colkeys=normalize_keys(get_col_keys())
+    if has_tqdm:
+        pbar=tqdm.tqdm(total=(len(rowkeys)*len(colkeys)))
 
-with open("output3.txt",'w') as f:
-    for possiblematch in decryptor():
-        f.write(possiblematch+'\n')
+    with open("normalized2.txt",'w') as f:
+        for col_key in colkeys:
+            for row_key in rowkeys:
+                text=encode(encode(secret,col_key),row_key)
+                f.write("{};{};{}\n".format(row_key,col_key,text))
+                if has_tqdm:
+                    pbar.update(1)
+    if has_tqdm:
+        pbar.close()
+
+decryptor()
