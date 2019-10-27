@@ -45,6 +45,7 @@ alias remnux_cyberchef_stop="sudo docker stop cyberchefy"
 alias remnux_crits_start='sudo docker run --rm --name critsy -it -v ${workdir-`pwd`}:/home/nonroot/workdir -p 8443:8443 remnux/crits'
 alias remnux_crits_stop="sudo docker stop critsy"
 alias docker_status="docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock moncho/dry"
+alias ntfsmount='sudo mount -o ro,show_sys_files,streams_interface=windows'
 alias pwsh=powershell
 #alias curl="curl -U 10341520 -x 192.168.193.6:8080"
 alias dritpwro='docker run -it --rm -v "$(pwd)":/data:ro'
