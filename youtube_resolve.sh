@@ -1,13 +1,14 @@
 #!/bin/bash
-url=$(echo -ne "${*}" | grep -Pio -m1 'https://www.youtube.com/(watch\?[^&|]+|embed/[^?/,|]+)')
+url=$(echo -ne "${*}" | grep -Pio -m1 'https://www.youtube.com/(watch\?[^&,|]+|embed/[^?/,|]+)')
+if [[ -n "${url}" ]] ; then
 title=$(wget -q -O- "${url}" | grep -Po "(?<=title>).*(?=</title)")
 title_parsed=$(cat <<eof | python3
 from urllib.parse import unquote
-import html
-import sys
+from html import unescape
 url="${title}"
-print(html.unescape(unquote(url)))
+print(unescape(unquote(url)))
 eof
 )
+echo "${url};\"${title_parsed}\""
 
-echo "${*};\"${title_parsed}\""
+fi
