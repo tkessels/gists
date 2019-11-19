@@ -1,18 +1,6 @@
 #!/bin/bash
-
-proxy_ip=$(env | grep http_proxy | grep -Pio '[^@/:]+(?=:\d+/?$)')
-proxy_port=$(env | grep http_proxy | grep -Pio '(?<=:)(\d+)(?=/?$)')
-
-if [ -z "${proxy_ip}" ]; then
-  echo "Enter Proxy IP or Hostname (no port): "
-  read proxy_ip
-fi
-if [ -z "${proxy_ip}" ]; then
-  echo -n "Proxy-Port: "
-  read proxy_port
-fi
-
-echo "Using ${proxy_ip}:${proxy_port} as Proxy!"
+path=$(dirname $(readlink -f "${0}"))
+. "${path}/get_proxy.sh"
 
 echo -n "Username: "
 read username

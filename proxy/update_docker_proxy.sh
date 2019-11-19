@@ -1,9 +1,12 @@
 #!/bin/bash
-#proxy_ip="192.168.x.x"
-proxy_port="8080"
 
-echo -n "Proxy_IP: "
-read proxy_ip
+
+
+#populate proxy_ip and proxy_port variables
+path=$(dirname $(readlink -f "${0}"))
+. "${path}/get_proxy.sh"
+
+
 echo -n "Username: "
 read username
 echo -n "Password: "
