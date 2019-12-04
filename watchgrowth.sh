@@ -10,7 +10,7 @@ old_size=${new_size}
 #speed=$(( ${size_diff} / (1024*1024) ))
 progress=""
 
-if [[ $# -eq 2 ]] ; then
+if [[ $# -eq 3 ]] ; then
 total=${2}
 progress_p=$(echo "2 k ${new_size} ${total} 100 / / p" | dc)
 progress="${progress_p} %"
