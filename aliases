@@ -8,7 +8,7 @@ alias mv="mv -vi"
 alias cp="cp -vi"
 alias nasmount="pushd . ; sudo mount ~/mnt/nas ; cd ~/mnt/nas"
 alias nasunmount="sudo umount ~/mnt/nas"
-alias docker_status="docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock moncho/dry"
+alias dockerstatus="docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock moncho/dry"
 alias kali='docker run --rm -it --dns=192.168.130.1 -v ${workdir-`pwd`}:/root/workdir kali'
 alias remnux_viper='docker run --rm -it --dns=192.168.130.1 -v ${workdir-`pwd`}:/home/nonroot/workdir remnux/viper bash'
 alias remnux_pescanner='docker run --rm -it --dns=192.168.130.1 -v ${workdir-`pwd`}:/home/nonroot/workdir remnux/pescanner bash'
@@ -30,7 +30,7 @@ alias cp="cp -vi"
 alias nasmount="pushd . ; sudo mount ~/mnt/nas ; cd ~/mnt/nas"
 alias nasunmount="sudo umount ~/mnt/nas"
 alias kali='docker run --rm -it -v ${workdir-`pwd`}:/root/workdir kali'
-alias powershell='docker run --rm -it -v ${workdir-`pwd`}:/data powershell pwsh'
+alias powershell='docker run --rm -it -v ${workdir-`pwd`}:/data mcr.microsoft.com/powershell pwsh'
 alias remnux_viper='docker run --rm -it --dns=192.168.130.1 -v ${workdir-`pwd`}:/home/nonroot/workdir remnux/viper bash'
 alias remnux_pescanner='docker run --rm -it --dns=192.168.130.1 -v ${workdir-`pwd`}:/home/nonroot/workdir remnux/pescanner bash'
 alias remnux_rekall='docker run --rm -it -p 8000:8000 --dns=192.168.130.1 -v ${workdir-`pwd`}:/home/nonroot/files remnux/rekall bash'
@@ -47,7 +47,7 @@ alias remnux_crits_stop="sudo docker stop critsy"
 alias docker_status="docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock moncho/dry"
 alias ntfsmount='sudo mount -o ro,show_sys_files,streams_interface=windows'
 alias pwsh=powershell
-#alias curl="curl -U 10341520 -x 192.168.193.6:8080"
+alias dmcreate="docker-machine create --driver google --google-project crypto-galaxy-182614 --google-zone europe-west2-a   --google-machine-type n1-highcpu-8 vm01 ; eval $(docker-machine env vm01)"
 alias dritpwro='docker run -it --rm -v "$(pwd)":/data:ro'
 alias dritpw='docker run -it --rm -v "$(pwd)":/data'
 alias drit='docker run -it --rm'

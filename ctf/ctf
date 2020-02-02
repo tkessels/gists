@@ -1,0 +1,7 @@
+import primefac
+import sys
+
+# n = int( sys.argv[1] )
+n=1547526036699919708490609738397251465827883560269494112135036895312456811185879551982265065963
+factors = list( primefac.primefac(n) )
+print '\n'.join(map(str, factors))
