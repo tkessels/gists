@@ -24,6 +24,7 @@ alias remnux_thug='sudo docker run --rm -it --dns=192.168.130.1 -v /var/log/dock
 alias remnux_viper='docker run --rm -it --dns=192.168.130.1 -v ${workdir-`pwd`}:/home/nonroot/workdir remnux/viper bash'
 alias remnux_vol='docker run --rm -it -v ${workdir-`pwd`}:/home/nonroot/memdumps remnux/volatility bash'
 alias rot13='tr "abcdefghijklmnopqrstuvwxyz" "zyxwvutsrqponmlkjihgfedcba"'
-function avscan(){ av="${1:-kaspersky}"; [[ "${av}" -eq "update" ]] && (docker pull tabledevil/kaspersky;docker pull tabledevil/sep;docker pull tabledevil/clamav) ||  dritpwro "tabledevil/${av}" scan ;}
+function bindiff() { cmp -l "${1}" "${2}" | gawk '{printf "%s,%02X,%02X\n",$1,strtonum(0$2),strtonum(0$3) }' ; }
+function avscan(){ av="${1:-kaspersky}" ; if [ "${av}" == "update" ] ; then ( docker pull tabledevil/kaspersky ; docker pull tabledevil/sep ; docker pull tabledevil/clamav) ; elif [[ $# -eq 2 ]] ; then dritpwro "tabledevil/${av}" "${2}" ; else dritpwro --network=none "tabledevil/${av}" scan ; fi ;  }
 function dockerfa() {  [[ $# -eq 0 ]] && wpd=$(readlink -f . ) || wpd=$(readlink -f "${1}");  docker run -it --rm -v "${wpd}":/data tabledevil/file-analysis;}
 function docker_killall() { docker rm $(docker stop $(docker ps -a -q --filter ancestor="${1}" --format="{{.ID}}")) ; }
