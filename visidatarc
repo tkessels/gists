@@ -1,0 +1,61 @@
+#copy or link this file to ~/.visidatarc
+
+from datetime import datetime
+
+#sym-ts = hexNcoded NT-Timestamp = Nanoseconds since 01.01.1601
+def sym_time(val):
+    a=int(val,16) #decode hex
+    b=(a / 10000000) - 11644473600 #convert to seconds and subtract offset to 01.01.1970
+    return datetime.fromtimestamp(b)
+
+def sym_id(val):
+    event_ids={
+        "2" : "Scan Stopped",
+        "3" : "Scan Started",
+        "4" : "Definition File Sent To Server",
+        "5" : "Virus Found",
+        "6" : "Scan Omission",
+        "7" : "Definition File Loaded",
+        "10" : "Checksum",
+        "11" : "Auto-Protect",
+        "12" : "Configuration Changed",
+        "13" : "Symantec AntiVirus Shutdown",
+        "14" : "Symantec AntiVirus Startup",
+        "16" : "Definition File Download",
+        "17" : "Scan Action Auto-Changed",
+        "18" : "Sent To Quarantine Server",
+        "19" : "Delivered To Symantec Security Response",
+        "20" : "Backup Restore Error",
+        "21" : "Scan Aborted",
+        "22" : "Load Error",
+        "23" : "Symantec AntiVirus Auto-Protect Loaded",
+        "24" : "Symantec AntiVirus Auto-Protect Unloaded",
+        "26" : "Scan Delayed",
+        "27" : "Scan Re-started",
+        "34" : "Log Forwarding Error",
+        "39" : "Definitions Rollback",
+        "40" : "Definitions Unprotected",
+        "41" : "Auto-Protect Error",
+        "42" : "Configuration Error",
+        "45" : "SymProtect Action",
+        "46" : "Detection Start",
+        "47" : "Detection Action",
+        "48" : "Pending Remediation Action",
+        "49" : "Failed Remediation Action",
+        "50" : "Successful Remediation Action",
+        "51" : "Detection Finish",
+        "65" : "Scan Stopped",
+        "66" : "Scan Started",
+        "71" : "Threat Now Whitelisted",
+        "72" : "Interesting Process Found Start",
+        "73" : "SONAR engine load error",
+        "74" : "SONAR definitions load error",
+        "75" : "Interesting Process Found Finish",
+        "76" : "SONAR operating system not supported",
+        "77" : "SONAR Detected Threat Now Known",
+        "78" : "SONAR engine is disabled",
+        "79" : "SONAR engine is enabled",
+        "80" : "Definition load failed",
+        "81" : "Cache server error",
+        "82" : "Reputation check timed out"}
+    return event_ids[val]
