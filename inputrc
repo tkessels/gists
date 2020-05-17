@@ -1,0 +1,15 @@
+#include all default settings (otherwise ignored)
+$include /etc/inputrc
+
+#ctrl + backspace delete word left of cursor
+"\C-h": backward-kill-word
+#ctrl + del delete word right of cursor
+"\e[3;5~": kill-word
+#ctrl + up complete line from history
+"\e[1;5A": history-search-backward
+#ctrl + 
+"\e[1;5B": history-search-forward
+#show list of possible matches if ambiguous
+set show-all-if-ambiguous on
+#tab complete even if case is wrong <3
+set completion-ignore-case on
