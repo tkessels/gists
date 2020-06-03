@@ -22,6 +22,7 @@ echo 'export "HTTP_PROXY=http://'"${username}"':"'"${encpassword}@${proxy_ip}:${
 echo 'export "HTTPS_PROXY=http://'"${username}"':"'"${encpassword}@${proxy_ip}:${proxy_port}/"  >> "${proxy_file}"
 echo 'export "http_proxy=http://'"${username}"':"'"${encpassword}@${proxy_ip}:${proxy_port}/"  >> "${proxy_file}"
 echo 'export "https_proxy=http://'"${username}"':"'"${encpassword}@${proxy_ip}:${proxy_port}/"  >> "${proxy_file}"
+echo 'export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt' >> "${proxy_file}"
 echo "[ -f ${noproxy_file} ] && . ${noproxy_file}" >> "${proxy_file}"
 
 [ -f "${noproxy_file}" ] || echo 'export "NO_PROXY=localhost,127.0.0.1"' > "${noproxy_file}"
