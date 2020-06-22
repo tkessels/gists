@@ -1,12 +1,87 @@
 #copy or link this file to ~/.visidatarc
 
 from datetime import datetime
+import functools
 
 #sym-ts = hexNcoded NT-Timestamp = Nanoseconds since 01.01.1601
 def sym_time(val):
     a=int(val,16) #decode hex
     b=(a / 10000000) - 11644473600 #convert to seconds and subtract offset to 01.01.1970
     return datetime.fromtimestamp(b)
+
+@functools.lru_cache()
+def vendor(mac):
+    try:
+      from mac_vendor_lookup import MacLookup as mlu
+      return mlu().lookup(mac)
+    except InvalidMacError:
+        return "not a MAC"
+    except ModuleNotFoundError:
+        return "module not available"
+
+@functools.lru_cache()
+def dns_lookup(domain,record='A'):
+    if len(domain.split(","))>1:
+      return ",".join([dns_lookup(x,record) for x in domain.split(",")])
+    try:
+      import dns
+      import dns.resolver as rs
+      result= rs.query(domain,record)
+      return ",".join([x.to_text() for x in result])
+    except dns.resolver.NoAnswer as e:
+        return ""
+    except dns.exception.DNSException as e:
+        # return e.msg
+        return ""
+    except ModuleNotFoundError:
+        return "module not available"
+
+@functools.lru_cache()
+def _ipinfo(ip):
+    try:
+      import requests
+      r = requests.get(url='http://ipinfo.io/{}/json'.format(ip))
+      return r.json()
+    except simplejson.errors.JSONDecodeError as e:
+        return None
+    except ModuleNotFoundError:
+        return None
+
+@functools.lru_cache()
+def ipinfo(ip,type="country"):
+    if len(ip.split(","))>1:
+      return ",".join([ipinfo(x,type) for x in ip.split(",")])
+    try:
+        return _ipinfo(ip)[type]
+    except:
+        return ""
+
+@functools.lru_cache()
+def mx_lookup(domain):
+    domain = domain.lstrip("www.")
+    try:
+      mxs = dns_lookup(domain,'MX').split(",")
+      mxt = [x.split(" ")[1] for x in mxs if len(x.split(" "))==2]
+      return ",".join(mxt)
+    except Exception as e:
+      return str(e)
+
+@functools.lru_cache()
+def grab_banner(ip,port=25):
+    if len(ip.split(","))>1:
+      return ",".join([grab_banner(x,port) for x in ip.split(",")])
+    try:
+      import socket
+      sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) #TCP
+      sock.settimeout(2)
+      sock.connect((ip,port))
+      ret = sock.recv(1024)
+      return str(ret.strip().decode())
+    except:
+      return ""
+
+
+
 
 def sym_id(val):
     event_ids={
