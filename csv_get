@@ -1,19 +1,26 @@
-#!/bin/bash
-#check if comma or semicolon
-if [[ $( grep -c ',' $1 ) -gt $( grep -c ';' $1 ) ]]
-then
-    delim=','
-else
-    delim=';'
-fi
+#!/usr/bin/env python3
+import csv
+import argparse
+import sys
 
-file=$1
-shift
-#build cut
-cut_cmd="cut -d${delim} -f"
-#for option in $* ; do
-#head -n1 $file | cut -d${delim} -f${option}
-#done
-cut_cmd="${cut_cmd}$(echo ${*} | tr ' ' ',') ${file}"
-#echo ${cut_cmd%,}
-$(echo $cut_cmd)
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', type=int, dest='columns', action="append")
+    parser.add_argument('infile', nargs='+', type=argparse.FileType('rt'))
+    args = parser.parse_args()
+    if args.columns is None or len(args.columns) == 0:
+        args.columns=[0]
+    for file in args.infile:
+        csv_infile=csv.reader(file)
+        for row in csv_infile:
+            try:
+                outrow = [row[index] for index in args.columns]
+                print('\t'.join(outrow))
+            except IndexError:
+                print("No such column.")
+                print("Input has columns: {}".format(",".join([str(x) for x in range(len(row))])))
+                print("You selected {}".format(args.columns))
+                sys.exit(1)
+
+if __name__ == '__main__':
+    main()
