@@ -3,6 +3,9 @@
 from datetime import datetime
 import functools
 
+def timefromts(val):
+    return datetime.fromtimestamp(float(val))
+
 #sym-ts = hexNcoded NT-Timestamp = Nanoseconds since 01.01.1601
 def sym_time(val):
     a=int(val,16) #decode hex
