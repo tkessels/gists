@@ -1,16 +1,35 @@
 #!/bin/bash
-marker="#PROXY_A93JK2"
-path=$(dirname $(readlink -f "${0}"))
-. "${path}/get_proxy.sh"
-
-echo -n "Username: "
-read username
-echo -n "Password: "
-read -s password
 user=$(logname)
 bashrc_file=/home/${user}/.bashrc
 proxy_file=/home/${user}/.http_proxy
 noproxy_file=/home/${user}/.http_noproxy
+
+#turn off bashrc proxy settings
+if [[ "${1}" == "off" ]]; then
+  echo "TURNING OFF PROXY IN BASHRC"
+  mv -v "${proxy_file}" "${proxy_file}.off"
+  exit 0
+fi
+
+#turn on bashrc proxy settings
+if [[ "${1}" == "on" ]]; then
+  if [[ -f "${proxy_file}.off" ]] ; then
+    echo "TURNING ON PROXY IN BASHRC"
+    mv -v "${proxy_file}" "${proxy_file}.off"
+    exit 0
+  else
+    echo "No disabled Proxy-Config found. Creating a new one!"
+fi
+
+
+marker="#PROXY_A93JK2"
+path=$(dirname $(readlink -f "${0}"))
+. "${path}/get_proxy.sh"
+echo -n "Username: "
+read username
+echo -n "Password: "
+read -s password
+
 
 encpassword=$(echo -n ${password}  | xxd -p | sed -e 's/\(..\)/%\1/g' )
 
