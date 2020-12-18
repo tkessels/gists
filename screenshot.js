@@ -12,7 +12,7 @@ if (args.length === 1) {
   });
 }
 var scriptname=args.shift()
-urls=args
+urls=args.slice(1)
 // var urls = [
 // 		"http://www.google.de",
 // 		"http://heise.de",
@@ -20,9 +20,11 @@ urls=args
 // 	]
 var	webpage = require('webpage'),
 	page = webpage.create(),
+  // page.width=1920;
 	nr = 0;
+  page.viewportSize = {width: 1920, height: 15000};
 // Seitendimensionen ggf. anpassen
-//page.viewportSize = {width: 1920, height: 4000};
+
 
 var screenshot = function() {
 	if (!urls.length) phantom.exit();
