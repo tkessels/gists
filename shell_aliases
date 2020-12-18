@@ -1,10 +1,10 @@
 alias cp="cp -vi"
-alias dmcreate='docker-machine create --driver google --google-project crypto-galaxy-182614 --google-zone europe-west2-a   --google-machine-type n1-highcpu-8 vm01 ; eval $(docker-machine env vm01)'
+alias dmcreate='docker-machine create --driver google --google-project crypto-galaxy-182614 --google-zone us-west1-a --google-machine-type f1-micro vm01 ; eval $(docker-machine env vm01)'
 alias dockerstatus="docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock moncho/dry"
 alias drit='docker run -it --rm'
 alias dritpw='docker run -it --rm -v "$(pwd)":/data'
 alias dritpwro='docker run -it --rm -v "$(pwd)":/data:ro'
-alias kali='docker run --rm -it -v ${workdir-`pwd`}:/root/workdir kali'
+alias kali='docker run --rm -it -v ${workdir-`pwd`}:/root/workdir kalilinux/kali-rolling'
 alias lazydocker="docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock -v /yourpath:/.config/jesseduffield/lazydocker lazyteam/lazydocker"
 alias mv="mv -vi"
 alias ntfsmount='sudo mount -o ro,show_sys_files,streams_interface=windows'
