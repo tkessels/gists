@@ -5,6 +5,7 @@ import magic
 
 extensions={
     "message_rfc822":"eml",
+    "application_x-7z-compressed":"7z",
     "text_html":"html"
     }
 
