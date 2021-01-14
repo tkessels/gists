@@ -6,7 +6,10 @@ import magic
 extensions={
     "message_rfc822":"eml",
     "application_x-7z-compressed":"7z",
-    "text_html":"html"
+    "text_html":"html",
+    "image_jpeg":"jpg",
+    "text_plain":"txt",
+    "application_pdf":"pdf"
     }
 
 def get_md5(filename):
