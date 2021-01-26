@@ -2,6 +2,7 @@
 import unicodedata
 import sys
 
+
 def long_cat(category):
     cats = {"Cc": "Other, Control",
             "Cf": "Other, Format",
@@ -40,10 +41,9 @@ def long_cat(category):
         return category
 
 
-print("{:^11} {:^10} {:^5} {:^26}   {:<30}".format("Decimal", "Hex", "Char", "Category", "Name"))
+print(f"  Decimal      Hex     Char  {'Category':^26}   Name")
 for argument in sys.argv[1:]:
     for char in argument:
-        #if character has now own width add a space ..... u know .... for spacing 
+        # if character has now own width add a space ..... u know .... for spacing
         spacing = " " if unicodedata.category(char) in ['Mn'] else ''
-        print("{:>8}    0x{:>06x}   {spacing}{:^5} {:<26} {:<30}".format(ord(char), ord(char), char, long_cat(unicodedata.category(char)), unicodedata.name(char),spacing=spacing))
-
+        print(f"{ord(char):>8}    0x{ord(char):>06x}   {spacing}{char:^5} {long_cat(unicodedata.category(char)):<26} {unicodedata.name(char):<30}")
