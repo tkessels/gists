@@ -1,4 +1,5 @@
 alias cp="cp -vi"
+alias sless='less -S -R'
 alias dmcreate='docker-machine create --driver google --google-project crypto-galaxy-182614 --google-zone us-west1-a --google-machine-type f1-micro vm01 ; eval $(docker-machine env vm01)'
 alias dockerstatus="docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock moncho/dry"
 alias dockerip="docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'"
