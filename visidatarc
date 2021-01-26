@@ -15,10 +15,10 @@ def sym_time(val):
 @functools.lru_cache()
 def vendor(mac):
     try:
-      from mac_vendor_lookup import MacLookup as mlu
-      return mlu().lookup(mac)
+      from mac_vendor_lookup import InvalidMacError, MacLookup as mlu
+      return mlu().lookup(mac.strip())
     except InvalidMacError:
-        return "not a MAC"
+        return f"not a MAC {str(mac).strip()} of type {type(mac)}"
     except ModuleNotFoundError:
         return "module not available"
 
@@ -43,9 +43,10 @@ def dns_lookup(domain,record='A'):
 def _ipinfo(ip):
     try:
       import requests
+      import json
       r = requests.get(url='http://ipinfo.io/{}/json'.format(ip))
       return r.json()
-    except simplejson.errors.JSONDecodeError as e:
+    except json.JSONDecodeError as e:
         return None
     except ModuleNotFoundError:
         return None
