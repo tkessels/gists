@@ -46,3 +46,4 @@ echo 'export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt' >> "${proxy_
 echo "[ -f ${noproxy_file} ] && . ${noproxy_file}" >> "${proxy_file}"
 
 [ -f "${noproxy_file}" ] || echo 'export "NO_PROXY=localhost,127.0.0.1"' > "${noproxy_file}"
+
