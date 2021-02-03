@@ -15,10 +15,11 @@ fi
 if [[ "${1}" == "on" ]]; then
   if [[ -f "${proxy_file}.off" ]] ; then
     echo "TURNING ON PROXY IN BASHRC"
-    mv -v "${proxy_file}" "${proxy_file}.off"
+    mv -v "${proxy_file}.off" "${proxy_file}"
     exit 0
   else
     echo "No disabled Proxy-Config found. Creating a new one!"
+  fi
 fi
 
 
