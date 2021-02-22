@@ -40,10 +40,25 @@ def long_cat(category):
     else:
         return category
 
+def print_info(char):
+    spacing = " " if unicodedata.category(char) in ['Mn'] else ''
+    try:
+        unicodename = unicodedata.name(char)
+    except ValueError as e:
+        unicodename = "UNKNOWN"
+    if ord(char) == 10:
+        unicodename = "UNKNOWN"
+        print(f"{ord(char):>8}    0x{ord(char):>06x}   {spacing}{' ':^5} {long_cat(unicodedata.category(char)):<26} {unicodename:<30}")
+    else:
+        print(f"{ord(char):>8}    0x{ord(char):>06x}   {spacing}{char:^5} {long_cat(unicodedata.category(char)):<26} {unicodename:<30}")
+
 
 print(f"  Decimal      Hex     Char  {'Category':^26}   Name")
-for argument in sys.argv[1:]:
-    for char in argument:
-        # if character has now own width add a space ..... u know .... for spacing
-        spacing = " " if unicodedata.category(char) in ['Mn'] else ''
-        print(f"{ord(char):>8}    0x{ord(char):>06x}   {spacing}{char:^5} {long_cat(unicodedata.category(char)):<26} {unicodedata.name(char):<30}")
+if len(sys.argv) == 1:
+    for char in sys.stdin.read():
+        print_info(char)
+else:
+    for argument in sys.argv[1:]:
+        for char in argument:
+            print_info(char)
+    
