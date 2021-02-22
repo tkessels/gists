@@ -1,36 +1,52 @@
-#copy or link this file to ~/.visidatarc
+# copy or link this file to ~/.visidatarc
 
 from datetime import datetime
 import functools
 
-def timefromts(val):
-    return datetime.fromtimestamp(float(val))
 
-#sym-ts = hexNcoded NT-Timestamp = Nanoseconds since 01.01.1601
+def timefromts(val):
+    try:
+        return datetime.fromtimestamp(float(val))
+    except ValueError:
+        pass
+    try:
+        return datetime.fromtimestamp(float(val)/1000)
+    except ValueError:
+        pass
+    try:
+        return datetime.fromtimestamp(float(val)/1000000)
+    except ValueError:
+        pass
+
+
+# sym-ts = hexNcoded NT-Timestamp = Nanoseconds since 01.01.1601
 def sym_time(val):
-    a=int(val,16) #decode hex
-    b=(a / 10000000) - 11644473600 #convert to seconds and subtract offset to 01.01.1970
+    a = int(val, 16)  # decode hex
+    # convert to seconds and subtract offset to 01.01.1970
+    b = (a / 10000000) - 11644473600
     return datetime.fromtimestamp(b)
+
 
 @functools.lru_cache()
 def vendor(mac):
     try:
-      from mac_vendor_lookup import InvalidMacError, MacLookup as mlu
-      return mlu().lookup(mac.strip())
+        from mac_vendor_lookup import InvalidMacError, MacLookup as mlu
+        return mlu().lookup(mac.strip())
     except InvalidMacError:
         return f"not a MAC {str(mac).strip()} of type {type(mac)}"
     except ModuleNotFoundError:
         return "module not available"
 
+
 @functools.lru_cache()
-def dns_lookup(domain,record='A'):
-    if len(domain.split(","))>1:
-      return ",".join([dns_lookup(x,record) for x in domain.split(",")])
+def dns_lookup(domain, record='A'):
+    if len(domain.split(",")) > 1:
+        return ",".join([dns_lookup(x, record) for x in domain.split(",")])
     try:
-      import dns
-      import dns.resolver as rs
-      result= rs.query(domain,record)
-      return ",".join([x.to_text() for x in result])
+        import dns
+        import dns.resolver as rs
+        result = rs.query(domain, record)
+        return ",".join([x.to_text() for x in result])
     except dns.resolver.NoAnswer as e:
         return ""
     except dns.exception.DNSException as e:
@@ -39,102 +55,104 @@ def dns_lookup(domain,record='A'):
     except ModuleNotFoundError:
         return "module not available"
 
+
 @functools.lru_cache()
 def _ipinfo(ip):
     try:
-      import requests
-      import json
-      r = requests.get(url='http://ipinfo.io/{}/json'.format(ip))
-      return r.json()
+        import requests
+        import json
+        r = requests.get(url='http://ipinfo.io/{}/json'.format(ip))
+        return r.json()
     except json.JSONDecodeError as e:
         return None
     except ModuleNotFoundError:
         return None
 
+
 @functools.lru_cache()
-def ipinfo(ip,type="country"):
-    if len(ip.split(","))>1:
-      return ",".join([ipinfo(x,type) for x in ip.split(",")])
+def ipinfo(ip, type="country"):
+    if len(ip.split(",")) > 1:
+        return ",".join([ipinfo(x, type) for x in ip.split(",")])
     try:
         return _ipinfo(ip)[type]
     except:
         return ""
 
+
 @functools.lru_cache()
 def mx_lookup(domain):
     domain = domain.lstrip("www.")
     try:
-      mxs = dns_lookup(domain,'MX').split(",")
-      mxt = [x.split(" ")[1] for x in mxs if len(x.split(" "))==2]
-      return ",".join(mxt)
+        mxs = dns_lookup(domain, 'MX').split(",")
+        mxt = [x.split(" ")[1] for x in mxs if len(x.split(" ")) == 2]
+        return ",".join(mxt)
     except Exception as e:
-      return str(e)
+        return str(e)
+
 
 @functools.lru_cache()
-def grab_banner(ip,port=25):
-    if len(ip.split(","))>1:
-      return ",".join([grab_banner(x,port) for x in ip.split(",")])
+def grab_banner(ip, port=25):
+    if len(ip.split(",")) > 1:
+        return ",".join([grab_banner(x, port) for x in ip.split(",")])
     try:
-      import socket
-      sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM) #TCP
-      sock.settimeout(2)
-      sock.connect((ip,port))
-      ret = sock.recv(1024)
-      return str(ret.strip().decode())
+        import socket
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # TCP
+        sock.settimeout(2)
+        sock.connect((ip, port))
+        ret = sock.recv(1024)
+        return str(ret.strip().decode())
     except:
-      return ""
-
-
+        return ""
 
 
 def sym_id(val):
-    event_ids={
-        "2" : "Scan Stopped",
-        "3" : "Scan Started",
-        "4" : "Definition File Sent To Server",
-        "5" : "Virus Found",
-        "6" : "Scan Omission",
-        "7" : "Definition File Loaded",
-        "10" : "Checksum",
-        "11" : "Auto-Protect",
-        "12" : "Configuration Changed",
-        "13" : "Symantec AntiVirus Shutdown",
-        "14" : "Symantec AntiVirus Startup",
-        "16" : "Definition File Download",
-        "17" : "Scan Action Auto-Changed",
-        "18" : "Sent To Quarantine Server",
-        "19" : "Delivered To Symantec Security Response",
-        "20" : "Backup Restore Error",
-        "21" : "Scan Aborted",
-        "22" : "Load Error",
-        "23" : "Symantec AntiVirus Auto-Protect Loaded",
-        "24" : "Symantec AntiVirus Auto-Protect Unloaded",
-        "26" : "Scan Delayed",
-        "27" : "Scan Re-started",
-        "34" : "Log Forwarding Error",
-        "39" : "Definitions Rollback",
-        "40" : "Definitions Unprotected",
-        "41" : "Auto-Protect Error",
-        "42" : "Configuration Error",
-        "45" : "SymProtect Action",
-        "46" : "Detection Start",
-        "47" : "Detection Action",
-        "48" : "Pending Remediation Action",
-        "49" : "Failed Remediation Action",
-        "50" : "Successful Remediation Action",
-        "51" : "Detection Finish",
-        "65" : "Scan Stopped",
-        "66" : "Scan Started",
-        "71" : "Threat Now Whitelisted",
-        "72" : "Interesting Process Found Start",
-        "73" : "SONAR engine load error",
-        "74" : "SONAR definitions load error",
-        "75" : "Interesting Process Found Finish",
-        "76" : "SONAR operating system not supported",
-        "77" : "SONAR Detected Threat Now Known",
-        "78" : "SONAR engine is disabled",
-        "79" : "SONAR engine is enabled",
-        "80" : "Definition load failed",
-        "81" : "Cache server error",
-        "82" : "Reputation check timed out"}
+    event_ids = {
+        "2": "Scan Stopped",
+        "3": "Scan Started",
+        "4": "Definition File Sent To Server",
+        "5": "Virus Found",
+        "6": "Scan Omission",
+        "7": "Definition File Loaded",
+        "10": "Checksum",
+        "11": "Auto-Protect",
+        "12": "Configuration Changed",
+        "13": "Symantec AntiVirus Shutdown",
+        "14": "Symantec AntiVirus Startup",
+        "16": "Definition File Download",
+        "17": "Scan Action Auto-Changed",
+        "18": "Sent To Quarantine Server",
+        "19": "Delivered To Symantec Security Response",
+        "20": "Backup Restore Error",
+        "21": "Scan Aborted",
+        "22": "Load Error",
+        "23": "Symantec AntiVirus Auto-Protect Loaded",
+        "24": "Symantec AntiVirus Auto-Protect Unloaded",
+        "26": "Scan Delayed",
+        "27": "Scan Re-started",
+        "34": "Log Forwarding Error",
+        "39": "Definitions Rollback",
+        "40": "Definitions Unprotected",
+        "41": "Auto-Protect Error",
+        "42": "Configuration Error",
+        "45": "SymProtect Action",
+        "46": "Detection Start",
+        "47": "Detection Action",
+        "48": "Pending Remediation Action",
+        "49": "Failed Remediation Action",
+        "50": "Successful Remediation Action",
+        "51": "Detection Finish",
+        "65": "Scan Stopped",
+        "66": "Scan Started",
+        "71": "Threat Now Whitelisted",
+        "72": "Interesting Process Found Start",
+        "73": "SONAR engine load error",
+        "74": "SONAR definitions load error",
+        "75": "Interesting Process Found Finish",
+        "76": "SONAR operating system not supported",
+        "77": "SONAR Detected Threat Now Known",
+        "78": "SONAR engine is disabled",
+        "79": "SONAR engine is enabled",
+        "80": "Definition load failed",
+        "81": "Cache server error",
+        "82": "Reputation check timed out"}
     return event_ids[val]
