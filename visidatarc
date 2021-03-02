@@ -37,6 +37,33 @@ def vendor(mac):
     except ModuleNotFoundError:
         return "module not available"
 
+@functools.lru_cache()
+def _get_vt():
+    try:
+        from virus_total_apis import PublicApi as VirusTotalPublicApi
+        with open('~/.virustotal_api_key') as af:
+            API_KEY = af.readline()
+        vt = VirusTotalPublicApi(API_KEY)
+        return vt
+    except:
+        return None
+
+@functools.lru_cache()
+def vt_ip(ip):
+    vt = _get_vt()
+    if vt is None:
+        return "VT-Error"
+    response = vt.get_ip_report(ip)
+    return response
+
+@functools.lru_cache()
+def vt_file(hash):
+    vt = _get_vt()
+    if vt is None:
+        return "VT-Error"
+    response = vt.get_file_report(hash)
+    return response
+
 
 @functools.lru_cache()
 def dns_lookup(domain, record='A'):
@@ -55,6 +82,34 @@ def dns_lookup(domain, record='A'):
     except ModuleNotFoundError:
         return "module not available"
 
+@functools.lru_cache()
+def _asn(ip):
+    from bs4 import BeautifulSoup
+    import requests
+    data = { 'q': ip,'query': 'Query'}
+    response = requests.post('https://asnip.net/ip2asn.php', data=data)
+    soup=BeautifulSoup(response.text,features='lxml')
+    table=soup.find_all('table')[1]
+    row=table.find_all('tr')[1]
+    cols = [ele.text.strip() for ele in row.find_all('td') ]
+    res = { 'asn' : cols[0] }
+    res['ip'] = cols[1]
+    res['name'] = cols[2]
+    res['country'] = ""
+    if "," in res['name']:
+        name_split=res['name'].split(",")
+        res['country']=name_split[-1].strip()
+        res['name']=" ".join(name_split[:-1])
+    return res
+
+@functools.lru_cache()
+def asn(ip, type="asn"):
+    if len(ip.split(",")) > 1:
+        return ",".join([_asn(x, type) for x in ip.split(",")])
+    try:
+        return _asn(ip)[type]
+    except:
+        return ""
 
 @functools.lru_cache()
 def _ipinfo(ip):
