@@ -4,3 +4,4 @@ alias cp="cp -vi"
 alias '+'='pushd .'
 alias -- '-'='popd'
 [[ -f ~/.shell_aliases ]] && . ~/.shell_aliases
+[[ -f ~/.config/z.sh ]] && . ~/.config/z.sh
