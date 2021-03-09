@@ -3,6 +3,11 @@
 from datetime import datetime
 import functools
 
+def tsfromtime(val, format):
+    import time
+    from calendar import timegm
+    utc_time = time.strptime(val, format)
+    return timegm(utc_time)
 
 def timefromts(val):
     try:
@@ -37,7 +42,7 @@ def vendor(mac):
     except ModuleNotFoundError:
         return "module not available"
 
-@functools.lru_cache()
+@functools.lru_cache(maxsize=1000)
 def _get_vt():
     try:
         from virus_total_apis import PublicApi as VirusTotalPublicApi
@@ -65,7 +70,7 @@ def vt_file(hash):
     return response
 
 
-@functools.lru_cache()
+@functools.lru_cache(maxsize=1000)
 def dns_lookup(domain, record='A'):
     if len(domain.split(",")) > 1:
         return ",".join([dns_lookup(x, record) for x in domain.split(",")])
@@ -111,7 +116,7 @@ def asn(ip, type="asn"):
     except:
         return ""
 
-@functools.lru_cache()
+@functools.lru_cache(maxsize=1000)
 def _ipinfo(ip):
     try:
         import requests
@@ -145,7 +150,7 @@ def mx_lookup(domain):
         return str(e)
 
 
-@functools.lru_cache()
+@functools.lru_cache(maxsize=1000)
 def grab_banner(ip, port=25):
     if len(ip.split(",")) > 1:
         return ",".join([grab_banner(x, port) for x in ip.split(",")])
