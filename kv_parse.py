@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 import re
 import json
+import argparse
 import sys
 
-with open(sys.argv[1],'rt') as infile:
-    data = infile.readlines()
+parser = argparse.ArgumentParser()
+parser.add_argument('infile', nargs='?', type=argparse.FileType('r'), default=sys.stdin)
+parser.add_argument('outfile', nargs='?', type=argparse.FileType('w'), default=sys.stdout)
+args = parser.parse_args()
+
+data = args.infile.readlines()
 
 kv_pat = re.compile('(?P<key>[^= ]+)=(?P<value>"[^"]+"|\S+)')
 
@@ -17,8 +22,6 @@ for line in data:
         line_dict[match[0]] = match[1].strip('"')
     log.append(line_dict) 
 
-print(json.dumps(log))
-# with open('log.json','wt') as outfile:
-#     json.dump(log,outfile)
+json.dump(log,args.outfile)
     
 
