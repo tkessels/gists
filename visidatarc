@@ -3,6 +3,15 @@
 from datetime import datetime
 import functools
 
+def avgdiff(values):
+    L = sorted(values)
+    a = L[1:]
+    b = L[:-1]
+    c = sum([abs(x[0]-x[1]) for x in zip(a,b)])
+    return c/len(a)
+
+aggregator('avgdiff', avgdiff)
+
 def tsfromtime(val, format):
     import time
     from calendar import timegm
