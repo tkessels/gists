@@ -1,32 +1,18 @@
 #!/usr/bin/python3 -u
 import tarfile
-import sys
 import hashlib
-#ask for parameters
-#1 = hashtype or md5 by defualt
-#2 = filename of tarfile
-try:
-    if len(sys.argv) == 3:
-        hashtype=sys.argv[1]
-        tarfilename=sys.argv[2]
-    else:
-        hashtype="md5"
-        tarfilename=sys.argv[1]
+import argparse
 
-    h=hashlib.new(hashtype)
-    tf=tarfile.open(tarfilename,'r')
-#print usage if anything goes wrong
-except Exception as e :
-    print(e)
-    print("usage: tarsum.py [hashtype] tarfile.tgz")
-    print("hashtype can be:")
-    print(hashlib.algorithms_available)
-    print("md5 is default")
-    exit(1)
+parser = argparse.ArgumentParser()
+parser.add_argument('infile', type=argparse.FileType('rb'))
+parser.add_argument('-c','--hashtype', default="md5" , choices=hashlib.algorithms_available )
+args = parser.parse_args()
+
+tf=tarfile.open(fileobj=args.infile)
 
 for file in tf:
     if file.isfile():
-        h=hashlib.new(hashtype)
+        h=hashlib.new(args.hashtype)
         extracted_file=tf.extractfile(file)
         for chunk in iter(lambda: extracted_file.read(h.block_size),b''):
             h.update(chunk)
