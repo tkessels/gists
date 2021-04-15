@@ -2,6 +2,10 @@
 
 from datetime import datetime
 import functools
+import json
+
+def what(item):
+    return f"{type(item)}:{str(item)}"
 
 def avgdiff(values):
     L = sorted(values)
@@ -12,10 +16,22 @@ def avgdiff(values):
 
 aggregator('avgdiff', avgdiff)
 
+def logtime(val):
+    a=str(val)
+    a=a.strip()
+    a=a.split(" ")
+    d=a[0].split("/")
+    t=a[1].split(":")
+    if (a[2] == "PM") and (t[0] != "12"):
+        t[0]=str(int(t[0])+12)
+    if (a[2] == "AM") and (t[0] == "12"):
+        t[0]="0"
+    return datetime(int(d[2]),int(d[0]),int(d[1]),int(t[0]),int(t[1]),int(t[2])).timestamp()
+    
 def tsfromtime(val, format):
     import time
     from calendar import timegm
-    utc_time = time.strptime(val, format)
+    utc_time = time.strptime(str(val).strip(), format)
     return timegm(utc_time)
 
 def timefromts(val):
