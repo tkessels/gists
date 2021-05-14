@@ -1,13 +1,13 @@
 alias cp="cp -vi"
 alias sless='less -S -R'
-alias dmcreate='docker-machine create --driver google --google-project crypto-galaxy-182614 --google-zone us-west1-a --google-machine-type f1-micro vm01 ; eval $(docker-machine env vm01)'
+#alias dmcreate='docker-machine create --driver google --google-project crypto-galaxy-182614 --google-zone us-west1-a --google-machine-type f1-micro vm01 ; eval $(docker-machine env vm01)'
 alias dockerstatus="docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock moncho/dry"
 alias dockerip="docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'"
 alias drit='docker run -i -t --rm'
-alias dritpw='docker run -i -t --rm -v "$(pwd)":/data'
-alias dritpwro='docker run -i -t --rm -v "$(pwd)":/data:ro'
+alias dritpw='docker run -i -t --rm -v "$(mktemp -d):/output" -v "$(pwd)":/data'
+alias dritpwro='docker run -i -t --rm -v "$(mktemp -d):/output" -v "$(pwd)":/data:ro'
 alias kali='docker run --rm -it -v ${workdir-`pwd`}:/root/workdir kalilinux/kali-rolling'
-alias lazydocker="docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock -v /yourpath:/.config/jesseduffield/lazydocker lazyteam/lazydocker"
+alias lazydocker="docker run --rm -it -v /var/run/docker.sock:/var/run/docker.sock -v /opt/lazydocker:/.config/jesseduffield/lazydocker lazyteam/lazydocker"
 alias mv="mv -vi"
 alias ntfsmount='sudo mount -o ro,show_sys_files,streams_interface=windows'
 alias powershell='docker run --rm -it -v ${workdir-`pwd`}:/data mcr.microsoft.com/powershell pwsh'
@@ -32,3 +32,5 @@ function bindiff() { cmp -l "${1}" "${2}" | gawk '{printf "%s,%02X,%02X\n",$1,st
 function avscan(){ av="${1:-kaspersky}" ; if [ "${av}" == "update" ] ; then ( docker pull tabledevil/kaspersky ; docker pull tabledevil/sep ; docker pull tabledevil/clamav) ; elif [[ $# -eq 2 ]] ; then dritpwro "tabledevil/${av}" "${2}" ; else dritpwro --network=none "tabledevil/${av}" scan ; fi ;  }
 function dockerfa() {  [[ $# -eq 0 ]] && wpd=$(readlink -f . ) || wpd=$(readlink -f "${1}");  docker run -it --rm -v "${wpd}":/data tabledevil/file-analysis;}
 function docker_killall() { docker rm $(docker stop $(docker ps -a -q --filter ancestor="${1}" --format="{{.ID}}")) ; }
+alias pip='pip3'
+alias python='python3'
