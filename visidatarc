@@ -241,3 +241,11 @@ def sym_id(val):
         "81": "Cache server error",
         "82": "Reputation check timed out"}
     return event_ids[val]
+
+# convert 4-byte integer to IP-String
+def int2ip(zahl):
+    return ".".join([str(c) for c in  zahl.to_bytes(4,'big')])
+
+# convert IP-String to Integer
+def ip2int(ip):
+    return int.from_bytes(b"".join([int(c).to_bytes(1,'big') for c in b.split('.')]),'big')
