@@ -1,57 +1,4 @@
 #!/bin/bash
-# Copyright 2020 Google Inc. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-set -e
-
-# Exit early if run as non-root user.
-if [ "$EUID" -ne 0 ]; then
-  echo "ERROR: This script need to run as root."
-  exit 1
-fi
-
-# Exit early if a timesketch directory already exists.
-if [ -d "./timesketch" ]; then
-  echo "ERROR: Timesketch directory already exist."
-  exit 1
-fi
-
-# Exit early if docker is not available.
-if [ "$(systemctl is-active docker)" != "active" ]; then
-  echo "ERROR: Docker is not available."
-  echo "See: https://docs.docker.com/engine/install/ubuntu/"
-  exit 1
-fi
-
-# Exit early if docker-compose is not installed.
-if ! command -v docker-compose; then
-  echo "ERROR: docker-compose is not installed."
-  exit 1
-fi
-
-# Exit early if there are Timesketch containers already running.
-if [ ! -z "$(docker ps | grep timesketch)" ]; then
-  echo "ERROR: Timesketch containers already running."
-  exit 1
-fi
-
-# Tweak for Elasticsearch
-echo "* Setting vm.max_map_count for Elasticsearch"
-sysctl -q -w vm.max_map_count=262144
-if [ -z "$(grep vm.max_map_count /etc/sysctl.conf)" ]; then
-  echo "vm.max_map_count=262144" >> /etc/sysctl.conf
-fi
 
 # Create dirs
 mkdir -p timesketch/{data/postgresql,data/elasticsearch,logs,etc,etc/timesketch,etc/timesketch/sigma/rules,upload}
@@ -73,17 +20,18 @@ echo "* Setting Elasticsearch memory allocation to ${ELASTIC_MEM_USE_GB}GB"
 
 # Docker compose and configuration
 echo -n "* Fetching configuration files.."
-curl -s $GITHUB_BASE_URL/docker/release/docker-compose.yml > timesketch/docker-compose.yml
-curl -s $GITHUB_BASE_URL/docker/release/config.env > timesketch/config.env
+curl  $GITHUB_BASE_URL/docker/release/docker-compose.yml > timesketch/docker-compose.yml
+curl  $GITHUB_BASE_URL/docker/release/config.env > timesketch/config.env
 
 # Fetch default Timesketch config files
-curl -s $GITHUB_BASE_URL/data/timesketch.conf > timesketch/etc/timesketch/timesketch.conf
-curl -s $GITHUB_BASE_URL/data/tags.yaml > timesketch/etc/timesketch/tags.yaml
-curl -s $GITHUB_BASE_URL/data/plaso.mappings > timesketch/etc/timesketch/plaso.mappings
-curl -s $GITHUB_BASE_URL/data/features.yaml > timesketch/etc/timesketch/features.yaml
-curl -s $GITHUB_BASE_URL/data/sigma_config.yaml > timesketch/etc/timesketch/sigma_config.yaml
-curl -s $GITHUB_BASE_URL/data/sigma/rules/lnx_susp_zenmap.yml > timesketch/etc/timesketch/sigma/rules/lnx_susp_zenmap.yml
-curl -s $GITHUB_BASE_URL/contrib/nginx.conf > timesketch/etc/nginx.conf
+curl  $GITHUB_BASE_URL/data/timesketch.conf > timesketch/etc/timesketch/timesketch.conf
+curl  $GITHUB_BASE_URL/data/tags.yaml > timesketch/etc/timesketch/tags.yaml
+curl  $GITHUB_BASE_URL/data/plaso.mappings > timesketch/etc/timesketch/plaso.mappings
+curl  $GITHUB_BASE_URL/data/generic.mappings > timesketch/etc/timesketch/generic.mappings
+curl  $GITHUB_BASE_URL/data/features.yaml > timesketch/etc/timesketch/features.yaml
+curl  $GITHUB_BASE_URL/data/sigma_config.yaml > timesketch/etc/timesketch/sigma_config.yaml
+curl  $GITHUB_BASE_URL/data/sigma/rules/lnx_susp_zenmap.yml > timesketch/etc/timesketch/sigma/rules/lnx_susp_zenmap.yml
+curl  $GITHUB_BASE_URL/contrib/nginx.conf > timesketch/etc/nginx.conf
 echo "OK"
 
 # Create a minimal Timesketch config
@@ -106,9 +54,6 @@ sed -i 's#postgresql://<USERNAME>:<PASSWORD>@localhost#postgresql://'$POSTGRES_U
 
 sed -i 's#^POSTGRES_PASSWORD=#POSTGRES_PASSWORD='$POSTGRES_PASSWORD'#' timesketch/config.env
 sed -i 's#^ELASTIC_MEM_USE_GB=#ELASTIC_MEM_USE_GB='$ELASTIC_MEM_USE_GB'#' timesketch/config.env
-
-echo "\n* Turning off autostart.."
-sed -i '/restart: always/d' timesketch/docker-compose.yml 
 
 ln -s ./config.env ./timesketch/.env
 echo "OK"
