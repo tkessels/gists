@@ -11,7 +11,10 @@ for line in sys.stdin:
     try:
         p=urlparse(line)
         if not pattern.search(p.netloc):
-            print(p.netloc)
+            if ":" in p.netloc:
+                print(p.netloc.split(":")[0])
+            else:
+                print(p.netloc)
     except Exception as e:
         print(e)
         pass
