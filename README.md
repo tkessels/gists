@@ -40,3 +40,7 @@ toggle touchpad on notebook on and off via xinput
     8352    0x0020a0     ₠   Symbol, Currency           EURO-CURRENCY SIGN            
     8477    0x00211d     ℝ   Letter, Uppercase          DOUBLE-STRUCK CAPITAL R       
     8376    0x0020b8     ₸   Symbol, Currency           TENGE SIGN                    
+  Decimal      Hex     Char           Category            Name
+   10003    0x002713     ✓   Symbol, Other              CHECK MARK                    
+   10033    0x002731     ✱   Symbol, Other              HEAVY ASTERISK                
+     945    0x0003b1     α   Letter, Lowercase          GREEK SMALL LETTER ALPHA      
