@@ -1,4 +1,6 @@
 # copy or link this file to ~/.visidatarc
+options.disp_date_fmt="%Y-%m-%dT%H:%M:%S"
+
 
 from datetime import datetime
 import functools
@@ -36,15 +38,15 @@ def tsfromtime(val, format):
 
 def timefromts(val):
     try:
-        return datetime.fromtimestamp(float(val))
+        return datetime.utcfromtimestamp(float(val))
     except ValueError:
         pass
     try:
-        return datetime.fromtimestamp(float(val)/1000)
+        return datetime.utcfromtimestamp(float(val)/1000)
     except ValueError:
         pass
     try:
-        return datetime.fromtimestamp(float(val)/1000000)
+        return datetime.utcfromtimestamp(float(val)/1000000)
     except ValueError:
         pass
 
