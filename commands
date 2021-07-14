@@ -13,3 +13,5 @@ primes 1 100 |gnuplot -p -e 'plot "/dev/stdin"'
 
 #use w3m without internet
 unshare -r -n w3m
+
+#testedit
